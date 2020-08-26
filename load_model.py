@@ -7,72 +7,82 @@ from bert_model_classes import BertModel
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def get_models(args, BERT_PT_PATH, trained=False, path_model_bert=None, path_model=None):
-    # some constants
-    agg_ops = ['', 'MAX', 'MIN', 'COUNT', 'SUM', 'AVG']
-    cond_ops = ['=', '>', '<', 'OP']  # do not know why 'OP' required. Hence,
+def get_bert_model(model_path, bert_model_type = 'uncased_L-12_H-768_A-12', no_pretraining = False,load_pretrained_model = False):
+    #bert_model_types:'uncased_L-12_H-768_A-12',
+                    # 'uncased_L-24_H-1024_A-16',
+                    # 'cased_L-12_H-768_A-12',
+                    #  'cased_L-24_H-1024_A-16',
+                    #  'multi_cased_L-12_H-768_A-12'
 
-    # print(f"Batch_size = {args.bS * args.accumulate_gradients}")
-    # print(f"BERT parameters:")
-    # print(f"learning rate: {args.lr_bert}")
-    # print(f"Fine-tune BERT: {args.fine_tune}")
+    # If bert model is cased we have to uncase it i.e. convert all stuff into lowercase
+    if bert_model_type == 'cased_L-12_H-768_A-12' or bert_model_type == 'cased_L-24_H-1024_A-16' or bert_model_type == 'multi_cased_L-12_H-768_A-12':
+        convert_to_lower_case = False
+    else:
+        convert_to_lower_case = True
 
-    # Get BERT
-    model_bert, tokenizer, bert_config = get_bert(BERT_PT_PATH, args.bert_type, args.do_lower_case,args.no_pretraining)
-    args.iS = bert_config.hidden_size * args.num_target_layers  # Seq-to-SQL input vector dimenstion
+    # File path of general configuration files
+    bert_config_file = os.path.join(model_path, f'bert_config_{bert_model_type}.json')
+    vocab_file = os.path.join(model_path, f'vocab_{bert_model_type}.txt')
+    initial_checkpoint = os.path.join(model_path, f'pytorch_model_{bert_model_type}.bin')
 
-    # Get Seq-to-SQL
-
-    n_cond_ops = len(cond_ops)
-    n_agg_ops = len(agg_ops)
-    print(f"Seq-to-SQL: the number of final BERT layers to be used: {args.num_target_layers}")
-    print(f"Seq-to-SQL: the size of hidden dimension = {args.hS}")
-    print(f"Seq-to-SQL: LSTM encoding layer size = {args.lS}")
-    print(f"Seq-to-SQL: dropout rate = {args.dr}")
-    print(f"Seq-to-SQL: learning rate = {args.lr}")
-    model = Seq2SQL_v1(args.iS, args.hS, args.lS, args.dr, n_cond_ops, n_agg_ops)
-    model = model.to(device)
-
-    if trained:
-        assert path_model_bert != None
-        assert path_model != None
-
-        if torch.cuda.is_available():
-            res = torch.load(path_model_bert)
-        else:
-            res = torch.load(path_model_bert, map_location='cpu')
-        model_bert.load_state_dict(res['model_bert'])
-        model_bert.to(device)
-
-        if torch.cuda.is_available():
-            res = torch.load(path_model)
-        else:
-            res = torch.load(path_model, map_location='cpu')
-
-        model.load_state_dict(res['model'])
-
-    return model, model_bert, tokenizer, bert_config
-
-def get_bert(BERT_PT_PATH, bert_type, do_lower_case, no_pretraining):
-    bert_config_file = os.path.join(BERT_PT_PATH, f'bert_config_{bert_type}.json')
-    vocab_file = os.path.join(BERT_PT_PATH, f'vocab_{bert_type}.txt')
-    init_checkpoint = os.path.join(BERT_PT_PATH, f'pytorch_model_{bert_type}.bin')
-
+    # Reading the configuration File
     bert_config = BertConfig.from_json_file(bert_config_file)
-    tokenizer = FullTokenizer(
-        vocab_file=vocab_file, do_lower_case=do_lower_case)
-    bert_config.print_status()
+    bert_config.print_status() #Comment out if we do't want extra lines printed out
 
+    # Loading a BERT model according to configuration file 
     model_bert = BertModel(bert_config)
+
+    # Building the Tokenizer
+    bert_tokenizer = FullTokenizer(vocab_file=vocab_file, do_lower_case=convert_to_lower_case)
+
+    # If we don't want to do pretraining
     if no_pretraining:
         pass
     else:
-        model_bert.load_state_dict(torch.load(init_checkpoint, map_location='cpu'))
+        model_bert.load_state_dict(torch.load(initial_checkpoint, map_location='cpu'))
         print("Load pre-trained parameters.")
     model_bert.to(device)
 
-    return model_bert, tokenizer, bert_config
+    # If we have to load a already trained model
+    if load_pretrained_model:
+        assert model_path != None
 
+        if torch.cuda.is_available():
+            res = torch.load(model_path)
+        else:
+            res = torch.load(model_path, map_location='cpu')
+        model_bert.load_state_dict(res['model_bert'])
+        model_bert.to(device)
+
+    return model_bert, bert_tokenizer, bert_config
+
+
+def get_seq2sql_model(bert_hidden_layer_size, number_of_layers = 2,
+                    hidden_vector_dimensions = 100,
+                    number_lstm_layers = 2,
+                    dropout_rate = 0.3,
+                    load_pretrained_model=False, model_path=None):
+    # number_of_layers = "The Number of final layers of BERT to be used in downstream task."
+    # hidden_vector_dimensions : "The dimension of hidden vector in the seq-to-SQL module."
+    # number_lstm_layers : "The number of LSTM layers." in seqtosqlmodule
+
+    sql_main_operators = ['', 'MAX', 'MIN', 'COUNT', 'SUM', 'AVG']
+    sql_conditional_operators = ['=', '>', '<', 'OP']
+
+    number_of_neurons = bert_hidden_layer_size * number_of_layers  # Seq-to-SQL input vector dimenstion
+
+    model = Seq2SQL_v1(number_of_neurons, hidden_vector_dimensions, number_lstm_layers, dropout_rate, len(sql_main_operators), len(sql_conditional_operators))
+    model = model.to(device)
+
+    if load_pretrained_model:
+        assert model_path != None
+        if torch.cuda.is_available():
+            res = torch.load(model_path)
+        else:
+            res = torch.load(model_path, map_location='cpu')
+        model.load_state_dict(res['model'])
+
+    return model
 
 def get_optimizers(model, model_bert, fine_tune ,learning_rate_model,learning_rate_bert):
 
