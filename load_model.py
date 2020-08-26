@@ -117,6 +117,21 @@ def get_seq2sql_model(bert_hidden_layer_size, number_of_layers = 2,
     return model
 
 def get_optimizers(model, model_bert, fine_tune =False,learning_rate_model=1e-3,learning_rate_bert=1e-5):
+    '''
+    get_optimizers
+    Arguments:
+    model: returned model from get_seq2sql_model
+    model_bert : returned model from get_bert_model
+    fine_tune : want to fine tune(true or false)
+    learning_rate_model : learning rate of model (from get_seq2sql_model)
+    learning_rate_bert : learning rate of bert model (from get_bert_model)
+    
+    Returns:
+    opt: returns the optimised model (from get_seq2sql_model)
+    opt_bert : returns the optimised bert model (from get_bert_model)
+
+    '''
+
 
     if fine_tune:
         opt = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()),
