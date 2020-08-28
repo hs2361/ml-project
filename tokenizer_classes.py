@@ -2,7 +2,13 @@ import collections
 import unicodedata
 import six
 
-
+def convert_tokens_to_ids(vocab, tokens):
+    """Converts a sequence of tokens into ids using the vocab."""
+    ids = []
+    for token in tokens:
+        ids.append(vocab[token])
+    return ids
+    
 def convert_to_unicode(text):
     """Converts `text` to Unicode (if it's not already), assuming utf-8 input."""
     if six.PY3:
