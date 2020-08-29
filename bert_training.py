@@ -58,14 +58,17 @@ def get_wv1(conds):
         wv1.append(cond[2])
     return wv1
 
-def get_g_wvi_corenlp(t):
-    g_wvi_corenlp = []
-    for t1 in t:
-        g_wvi_corenlp.append( t1['wvi_corenlp'] )
-    return g_wvi_corenlp
 
 def get_wemb_bert(bert_config, model_bert, tokenizer, nlu_t, hds, max_seq_length, num_out_layers_n=1, num_out_layers_h=1):
-
+    '''
+    wemb_n : word embedding of natural language question
+    wemb_h : word embedding of header
+    l_n : length of natural question
+    l_hs : length of header
+    nlu_tt : Natural language double tokenized
+    t_to_tt_idx : map first level tokenization to second level tokenization
+    tt_to_t_idx : map second level tokenization to first level tokenization
+    '''
     # get contextual output of all tokens from bert
     all_encoder_layer, pooled_output, tokens, i_nlu, i_hds,\
     l_n, l_hpu, l_hs, \
