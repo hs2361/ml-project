@@ -5,8 +5,6 @@ from bert_model_classes import BertConfig
 from tokenizer_classes import FullTokenizer
 from bert_model_classes import BertModel
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 def get_bert_model(model_path, bert_model_type = 'uncased_L-12_H-768_A-12', no_pretraining = False,load_pretrained_model = False):
     '''
     get_bert_model
@@ -55,7 +53,7 @@ def get_bert_model(model_path, bert_model_type = 'uncased_L-12_H-768_A-12', no_p
     else:
         model_bert.load_state_dict(torch.load(initial_checkpoint, map_location='cpu'))
         print("Load pre-trained parameters.")
-    model_bert.to(device)
+    model_bert
 
     # If we have to load a already trained model
     if load_pretrained_model:
@@ -66,7 +64,7 @@ def get_bert_model(model_path, bert_model_type = 'uncased_L-12_H-768_A-12', no_p
         else:
             res = torch.load(model_path, map_location='cpu')
         model_bert.load_state_dict(res['model_bert'])
-        model_bert.to(device)
+        model_bert
 
     return model_bert, bert_tokenizer, bert_config
 
@@ -104,7 +102,7 @@ def get_seq2sql_model(bert_hidden_layer_size, number_of_layers = 2,
     number_of_neurons = bert_hidden_layer_size * number_of_layers  # Seq-to-SQL input vector dimenstion
 
     model = Seq2SQL_v1(number_of_neurons, hidden_vector_dimensions, number_lstm_layers, dropout_rate, len(sql_main_operators), len(sql_conditional_operators))
-    model = model.to(device)
+    model = model
 
     if load_pretrained_model:
         assert model_path != None
