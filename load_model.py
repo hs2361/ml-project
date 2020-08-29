@@ -101,7 +101,7 @@ def get_seq2sql_model(bert_hidden_layer_size, number_of_layers = 2,
 
     number_of_neurons = bert_hidden_layer_size * number_of_layers  # Seq-to-SQL input vector dimenstion
 
-    model = Seq2SQL_v1(iS = number_of_neurons, hS= hidden_vector_dimensions,lS= number_lstm_layers, dr= dropout_rate, n_cond_ops=4,  n_agg_ops=6)
+    model = Seq2SQL_v1(number_of_neurons, hidden_vector_dimensions, number_lstm_layers, dropout_rate, len(sql_conditional_operators), len(sql_main_operators))
     model = model
 
     if load_pretrained_model:
