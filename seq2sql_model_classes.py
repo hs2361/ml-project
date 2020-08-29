@@ -6,7 +6,7 @@ from matplotlib.pylab import *
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from seq2sql_model_functions import *
+from seq2sql_model_internal_functions import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
