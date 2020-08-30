@@ -3,61 +3,34 @@ import torch
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def get_g(sql_i):
+def get_ground_truth(sql_canonical):
     """ for backward compatibility, separated with get_g"""
-    g_sc = []
-    g_sa = []
-    g_wn = []
-    g_wc = []
-    g_wo = []
-    g_wv = []
-    for b, psql_i1 in enumerate(sql_i):
-        g_sc.append( psql_i1["sel"] )
-        g_sa.append( psql_i1["agg"])
+    ground_truth_select_clause = []
+    ground_truth_select_aggregate = []
+    ground_truth_where_number = []
+    ground_truth_where_clause = []
+    ground_truth_where_operator = []
+    ground_truth_where_value = []
 
-        conds = psql_i1['conds']
-        if not psql_i1["agg"] < 0:
-            g_wn.append( len( conds ) )
-            g_wc.append( get_wc1(conds) )
-            g_wo.append( get_wo1(conds) )
-            g_wv.append( get_wv1(conds) )
+    for index, sql_data in enumerate(sql_canonical):
+        ground_truth_select_clause.append(sql_data["sel"])
+        ground_truth_select_aggregate.append(sql_data["agg"])
+
+        conditions = sql_data['conds']
+
+        if not sql_data["agg"] < 0:
+            ground_truth_where_number = len(conditions)
+            
+            for condition in conditions:
+                ground_truth_where_clause.append(condition[0])
+                ground_truth_where_operator.append(condition[1])
+                ground_truth_where_value.append(condition[2])
+            
         else:
             raise EnvironmentError
-    return g_sc, g_sa, g_wn, g_wc, g_wo, g_wv
 
-def get_wc1(conds):
-    """
-    [ [wc, wo, wv],
-      [wc, wo, wv], ...
-    ]
-    """
-    wc1 = []
-    for cond in conds:
-        wc1.append(cond[0])
-    return wc1
-
-def get_wo1(conds):
-    """
-    [ [wc, wo, wv],
-      [wc, wo, wv], ...
-    ]
-    """
-    wo1 = []
-    for cond in conds:
-        wo1.append(cond[1])
-    return wo1
-
-def get_wv1(conds):
-    """
-    [ [wc, wo, wv],
-      [wc, wo, wv], ...
-    ]
-    """
-    wv1 = []
-    for cond in conds:
-        wv1.append(cond[2])
-    return wv1
-
+    return ground_truth_select_clause, ground_truth_select_aggregate, ground_truth_where_number,\
+            ground_truth_where_clause, ground_truth_where_operator, ground_truth_where_value
 
 def get_wemb_bert(bert_config, model_bert, tokenizer, nlu_t, hds, max_seq_length, num_out_layers_n=1, num_out_layers_h=1):
     '''
