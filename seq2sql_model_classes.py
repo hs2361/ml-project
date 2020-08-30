@@ -6,9 +6,9 @@ from matplotlib.pylab import *
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from seq2sql_model_functions import *
+from seq2sql_model_internal_functions import *
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 
 class Seq2SQL_v1(nn.Module):
@@ -114,8 +114,8 @@ class Seq2SQL_v1(nn.Module):
 
         # sa
         # Construct all possible sc_sa_score
-        prob_sc_sa = torch.zeros([bS, beam_size, self.n_agg_ops]).to(device)
-        prob_sca = torch.zeros_like(prob_sc_sa).to(device)
+        prob_sc_sa = torch.zeros([bS, beam_size, self.n_agg_ops])
+        prob_sca = torch.zeros_like(prob_sc_sa)
 
         # get the top-k indices.  pr_sc_beam = [B, beam_size]
         pr_sc_beam = pred_sc_beam(s_sc, beam_size)
@@ -342,7 +342,7 @@ class SCP(nn.Module):
 
         feature = torch.zeros(bS, mL_n, self.question_knowledge_dim).scatter_(dim=-1,
                                                                               index=knowledge,
-                                                                              value=1).to(device)
+                                                                              value=1)
         wenc_n = torch.cat([wenc_n, feature], -1)
         wenc_hs = encode_hpu(self.enc_h, wemb_hpu, l_hpu, l_hs)  # [b, hs, dim]
         knowledge_header = [k + (max(l_hs) - len(k)) * [0]
@@ -350,7 +350,7 @@ class SCP(nn.Module):
         knowledge_header = torch.tensor(knowledge_header).unsqueeze(-1)
         feature2 = torch.zeros(bS, max(l_hs), self.header_knowledge_dim).scatter_(dim=-1,
                                                                                   index=knowledge_header,
-                                                                                  value=1).to(device)
+                                                                                  value=1)
         wenc_hs = torch.cat([wenc_hs, feature2], -1)
         bS = len(l_hs)
         mL_n = max(l_n)
@@ -452,7 +452,7 @@ class SAP(nn.Module):
 
         feature = torch.zeros(bS, mL_n, self.question_knowledge_dim).scatter_(dim=-1,
                                                                               index=knowledge,
-                                                                              value=1).to(device)
+                                                                              value=1)
         wenc_n = torch.cat([wenc_n, feature], -1)
 
         wenc_hs = encode_hpu(self.enc_h, wemb_hpu, l_hpu, l_hs)  # [b, hs, dim]
@@ -461,7 +461,7 @@ class SAP(nn.Module):
         knowledge_header = torch.tensor(knowledge_header).unsqueeze(-1)
         feature2 = torch.zeros(bS, max(l_hs), self.header_knowledge_dim).scatter_(dim=-1,
                                                                                   index=knowledge_header,
-                                                                                  value=1).to(device)
+                                                                                  value=1)
         wenc_hs = torch.cat([wenc_hs, feature2], -1)
         bS = len(l_hs)
         mL_n = max(l_n)
@@ -544,7 +544,7 @@ class WNP(nn.Module):
         knowledge_header = torch.tensor(knowledge_header).unsqueeze(-1)
         feature2 = torch.zeros(bS, max(l_hs), self.header_knowledge_dim).scatter_(dim=-1,
                                                                                   index=knowledge_header,
-                                                                                  value=1).to(device)
+                                                                                  value=1)
         wenc_hs = torch.cat([wenc_hs, feature2], -1)
 
         bS = len(l_hs)
@@ -598,7 +598,7 @@ class WNP(nn.Module):
 
         feature = torch.zeros(bS, mL_n, self.question_knowledge_dim).scatter_(dim=-1,
                                                                               index=knowledge,
-                                                                              value=1).to(device)
+                                                                              value=1)
         wenc_n = torch.cat([wenc_n, feature], -1)
 
         # [B, max_len, 100] -> [B, max_len, 1] -> [B, max_len]
@@ -674,7 +674,7 @@ class WCP(nn.Module):
 
         feature = torch.zeros(bS, mL_n, self.question_knowledge_dim).scatter_(dim=-1,
                                                                               index=knowledge,
-                                                                              value=1).to(device)
+                                                                              value=1)
         wenc_n = torch.cat([wenc_n, feature], -1)
 
         wenc_hs = encode_hpu(self.enc_h, wemb_hpu, l_hpu, l_hs)  # [b, hs, dim]
@@ -683,7 +683,7 @@ class WCP(nn.Module):
         knowledge_header = torch.tensor(knowledge_header).unsqueeze(-1)
         feature2 = torch.zeros(bS, max(l_hs), self.header_knowledge_dim).scatter_(dim=-1,
                                                                                   index=knowledge_header,
-                                                                                  value=1).to(device)
+                                                                                  value=1)
         wenc_hs = torch.cat([wenc_hs, feature2], -1)
         # attention
         # wenc = [bS, mL, hS]
@@ -734,7 +734,7 @@ class WCP(nn.Module):
         # index = torch.tensor(predict_select_column).unsqueeze(-1)
         # feature = torch.zeros(bS, max(l_hs)).scatter_(dim=-1,
         #                                                  index=index,
-        #                                                  value=1).to(device)
+        #                                                  value=1)
         # c_n = torch.cat([c_n, feature.unsqueeze(-1)],dim=-1)
 
         y = torch.cat([self.W_c(c_n), self.W_hs(wenc_hs)],
@@ -800,7 +800,7 @@ class WOP(nn.Module):
 
                 feature = torch.zeros(bS, mL_n, self.question_knowledge_dim).scatter_(dim=-1,
                                                                                       index=knowledge,
-                                                                                      value=1).to(device)
+                                                                                      value=1)
                 wenc_n = torch.cat([wenc_n, feature], -1)
 
         wenc_hs = encode_hpu(self.enc_h, wemb_hpu, l_hpu, l_hs)  # [b, hs, dim]
@@ -810,7 +810,7 @@ class WOP(nn.Module):
             knowledge_header = torch.tensor(knowledge_header).unsqueeze(-1)
             feature2 = torch.zeros(bS, max(l_hs), self.header_knowledge_dim).scatter_(dim=-1,
                                                                                       index=knowledge_header,
-                                                                                      value=1).to(device)
+                                                                                      value=1)
             wenc_hs = torch.cat([wenc_hs, feature2], -1)
 
         bS = len(l_hs)
@@ -829,7 +829,7 @@ class WOP(nn.Module):
 
         # list to [B, 4, dim] tensor.
         wenc_hs_ob = torch.stack(wenc_hs_ob)  # list to tensor.
-        wenc_hs_ob = wenc_hs_ob.to(device)
+        wenc_hs_ob = wenc_hs_ob
 
         # [B, 1, mL_n, dim] * [B, 4, dim, 1]
         #  -> [B, 4, mL_n, 1] -> [B, 4, mL_n]
@@ -950,7 +950,7 @@ class WVP_se(nn.Module):
 
             feature = torch.zeros(bS, mL_n, self.question_knowledge_dim).scatter_(dim=-1,
                                                                                   index=knowledge,
-                                                                                  value=1).to(device)
+                                                                                  value=1)
             wenc_n = torch.cat([wenc_n, feature], -1)
 
         wenc_hs = encode_hpu(self.enc_h, wemb_hpu, l_hpu, l_hs)  # [b, hs, dim]
@@ -960,7 +960,7 @@ class WVP_se(nn.Module):
         knowledge_header = torch.tensor(knowledge_header).unsqueeze(-1)
         feature2 = torch.zeros(bS, max(l_hs), self.header_knowledge_dim).scatter_(dim=-1,
                                                                                   index=knowledge_header,
-                                                                                  value=1).to(device)
+                                                                                  value=1)
         wenc_hs = torch.cat([wenc_hs, feature2], -1)
 
         wenc_hs_ob = []  # observed hs
@@ -977,7 +977,7 @@ class WVP_se(nn.Module):
 
         # list to [B, 4, dim] tensor.
         wenc_hs_ob = torch.stack(wenc_hs_ob)  # list to tensor.
-        wenc_hs_ob = wenc_hs_ob.to(device)
+        wenc_hs_ob = wenc_hs_ob
 
         # Column attention
         # [B, 1, mL_n, dim] * [B, 4, dim, 1]
@@ -1044,7 +1044,7 @@ class WVP_se(nn.Module):
 
         # list to [B, 4, dim] tensor.
         wenc_op = torch.stack(wenc_op)  # list to tensor.
-        wenc_op = wenc_op.to(device)
+        wenc_op = wenc_op
 
         # Now after concat, calculate logits for each token
         # [bS, 5-1, 3*hS] = [bS, 4, 300]
