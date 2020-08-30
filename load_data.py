@@ -63,45 +63,33 @@ def get_data(file_path: str,batch_size: int):
 
     return train_data, train_table, dev_data, dev_table, train_loader, dev_loader
 
-def get_fields_1(t1, tables, no_hs_t=False, no_sql_t=False):
-    nlu1 = t1['question']
-    nlu_t1 = t1['question_tok']
-    tid1 = t1['table_id']
-    sql_i1 = t1['sql']
-    sql_q1 = t1['query']
-    if no_sql_t:
-        sql_t1 = None
-    else:
-        sql_t1 = t1['query_tok']
+def get_fields(tables_data, input_tables, header_tokenization=True, sql_tokenization=True):
 
-    tb1 = tables[tid1]
-    if not no_hs_t:
-        hs_t1 = tb1['header_tok']
-    else:
-        hs_t1 = []
-    hs1 = tb1['header']
+    natural_language_utterance = []
+    tokenized_natural_language_utterance = []
+    sql_indexing = []
+    sql_query = []
+    tokenized_sql_query = []
+    table_indices = []
+    tokenized_headers = []
+    headers = []
 
-    return nlu1, nlu_t1, tid1, sql_i1, sql_q1, sql_t1, tb1, hs_t1, hs1
+    for table_data in tables_data:
+        natural_language_utterance.append(table_data['question'])
+        tokenized_natural_language_utterance.append(table_data['question_tok'])
+        sql_indexing.append(table_data['sql'])
+        sql_query.append(table_data['query'])
+        headers.append(table_data['header'])
+        table_indices.append(table_data['table_id'])
 
-def get_fields(t1s, tables, no_hs_t=False, no_sql_t=False):
-
-    nlu, nlu_t, tid, sql_i, sql_q, sql_t, tb, hs_t, hs = [], [], [], [], [], [], [], [], []
-    for t1 in t1s:
-        if no_hs_t:
-            nlu1, nlu_t1, tid1, sql_i1, sql_q1, sql_t1, tb1, hs_t1, hs1 = get_fields_1(t1, tables, no_hs_t, no_sql_t)
+        if sql_tokenization:
+            tokenized_sql_query.append(table_data['query_tok'])
         else:
-            nlu1, nlu_t1, tid1, sql_i1, sql_q1, sql_t1, tb1, hs_t1, hs1 = get_fields_1(t1, tables, no_hs_t, no_sql_t)
-
-        nlu.append(nlu1)
-        nlu_t.append(nlu_t1)
-        tid.append(tid1)
-        sql_i.append(sql_i1)
-        sql_q.append(sql_q1)
-        sql_t.append(sql_t1)
-
-        tb.append(tb1)
-        hs_t.append(hs_t1)
-        hs.append(hs1)
-
-    return nlu, nlu_t, sql_i, sql_q, sql_t, tb, hs_t, hs
-
+            tokenized_sql_query.append(None)
+        
+        if header_tokenization:
+            tokenized_headers.append(table_data['header_tok'])
+        else:
+            tokenized_headers.append([])
+        
+    return natural_language_utterance,tokenized_natural_language_utterance,sql_indexing,sql_query,tokenized_sql_query,table_indices,tokenized_headers,headers
