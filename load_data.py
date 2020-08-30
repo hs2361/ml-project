@@ -79,7 +79,7 @@ def get_fields(tables_data, input_tables, header_tokenization=True, sql_tokeniza
         tokenized_natural_language_utterance.append(table_data['question_tok'])
         sql_indexing.append(table_data['sql'])
         sql_query.append(table_data['query'])
-        headers.append(table_data['header'])
+        headers.append(input_tables[table_data['table_id']]['header'])
         table_indices.append(table_data['table_id'])
 
         if sql_tokenization:
@@ -88,7 +88,7 @@ def get_fields(tables_data, input_tables, header_tokenization=True, sql_tokeniza
             tokenized_sql_query.append(None)
         
         if header_tokenization:
-            tokenized_headers.append(table_data['header_tok'])
+            tokenized_headers.append(input_tables[table_data['table_id']]['header_tok'])
         else:
             tokenized_headers.append([])
         
