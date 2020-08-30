@@ -3,6 +3,65 @@ import torch
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
+def get_wc1(conds):
+    """
+    [ [wc, wo, wv],
+      [wc, wo, wv], ...
+    ]
+    """
+    wc1 = []
+    for cond in conds:
+        wc1.append(cond[0])
+    return wc1
+
+
+def get_wo1(conds):
+    """
+    [ [wc, wo, wv],
+      [wc, wo, wv], ...
+    ]
+    """
+    wo1 = []
+    for cond in conds:
+        wo1.append(cond[1])
+    return wo1
+
+
+def get_wv1(conds):
+    """
+    [ [wc, wo, wv],
+      [wc, wo, wv], ...
+    ]
+    """
+    wv1 = []
+    for cond in conds:
+        wv1.append(cond[2])
+    return wv1
+
+
+def get_g(sql_i):
+    """ for backward compatibility, separated with get_g"""
+    g_sc = []
+    g_sa = []
+    g_wn = []
+    g_wc = []
+    g_wo = []
+    g_wv = []
+    for b, psql_i1 in enumerate(sql_i):
+        g_sc.append( psql_i1["sel"] )
+        g_sa.append( psql_i1["agg"])
+
+        conds = psql_i1['conds']
+        if not psql_i1["agg"] < 0:
+            g_wn.append( len( conds ) )
+            g_wc.append( get_wc1(conds) )
+            g_wo.append( get_wo1(conds) )
+            g_wv.append( get_wv1(conds) )
+        else:
+            raise EnvironmentError
+    return g_sc, g_sa, g_wn, g_wc, g_wo, g_wv
+
 def get_ground_truth(sql_canonical):
     """ for backward compatibility, separated with get_g"""
     ground_truth_select_clause = []
