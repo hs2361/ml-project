@@ -62,34 +62,34 @@ def get_g(sql_i):
             raise EnvironmentError
     return g_sc, g_sa, g_wn, g_wc, g_wo, g_wv
 
-def get_ground_truth(sql_canonical):
-    """ for backward compatibility, separated with get_g"""
-    ground_truth_select_clause = []
-    ground_truth_select_aggregate = []
-    ground_truth_where_number = []
-    ground_truth_where_clause = []
-    ground_truth_where_operator = []
-    ground_truth_where_value = []
+# def get_ground_truth(sql_canonical):
+#     """ for backward compatibility, separated with get_g"""
+#     ground_truth_select_clause = []
+#     ground_truth_select_aggregate = []
+#     ground_truth_where_number = []
+#     ground_truth_where_clause = []
+#     ground_truth_where_operator = []
+#     ground_truth_where_value = []
 
-    for index, sql_data in enumerate(sql_canonical):
-        ground_truth_select_clause.append(sql_data["sel"])
-        ground_truth_select_aggregate.append(sql_data["agg"])
+#     for index, sql_data in enumerate(sql_canonical):
+#         ground_truth_select_clause.append(sql_data["sel"])
+#         ground_truth_select_aggregate.append(sql_data["agg"])
 
-        conditions = sql_data['conds']
+#         conditions = sql_data['conds']
 
-        if not sql_data["agg"] < 0:
-            ground_truth_where_number = len(conditions)
+#         if not sql_data["agg"] < 0:
+#             ground_truth_where_number = len(conditions)
             
-            for condition in conditions:
-                ground_truth_where_clause.append(condition[0])
-                ground_truth_where_operator.append(condition[1])
-                ground_truth_where_value.append(condition[2])
+#             for condition in conditions:
+#                 ground_truth_where_clause.append(condition[0])
+#                 ground_truth_where_operator.append(condition[1])
+#                 ground_truth_where_value.append(condition[2])
             
-        else:
-            raise EnvironmentError
+#         else:
+#             raise EnvironmentError
 
-    return ground_truth_select_clause, ground_truth_select_aggregate, ground_truth_where_number,\
-            ground_truth_where_clause, ground_truth_where_operator, ground_truth_where_value
+#     return ground_truth_select_clause, ground_truth_select_aggregate, ground_truth_where_number,\
+#             ground_truth_where_clause, ground_truth_where_operator, ground_truth_where_value
 
 def get_wemb_bert(bert_config, model_bert, tokenizer, nlu_t, hds, max_seq_length, num_out_layers_n=1, num_out_layers_h=1):
     '''
