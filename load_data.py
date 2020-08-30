@@ -99,7 +99,7 @@ from matplotlib.pylab import *
 
 def get_data(path_wikisql,batch_size=8):
     train_data, train_table, dev_data, dev_table, _, _ = load_wikisql(path_wikisql, False, 12,
-                                                                      no_w2i=True, no_hs_tok=True)
+                                                                      no_w2i=True, no_hs_tok=False)
     train_loader, dev_loader = get_loader_wikisql(train_data, dev_data, batch_size, shuffle_train=True)
 
     return train_data, train_table, dev_data, dev_table, train_loader, dev_loader
