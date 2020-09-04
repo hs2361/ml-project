@@ -45,8 +45,9 @@ def sort_and_generate_pr_w(pr_sql_i):
 
     return pr_wc, pr_wo, pr_wv, pr_sql_i
 
-def process(data,table,output_name):
-    tokenize=FullTokenizer()
+def process(data,table,model_path,bert_model_type='uncased_L-12_H-768_A-12'):
+    vocab_file = os.path.join(model_path, f'vocab_{bert_model_type}.txt')
+    tokenize=FullTokenizer(vocab_file=vocab_file)
     final_all = []
     badcase = 0
     for i, one_data in enumerate(data):
@@ -154,8 +155,9 @@ def process(data,table,output_name):
             # print(one_table["rows"])
             one_final["bertindex_knowledge"] = [0] * len(nlu_tt1)
             badcase+=1
-        final_all.append(one_final)
+        final_all.append([one_data["question_tok"],one_final["bertindex_knowledge"],one_final["header_knowledge"]])
         # print(badcase)
+    return final_all
   
 
 def contains2(small_str,big_str):
