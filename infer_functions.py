@@ -1,6 +1,7 @@
 from matplotlib.pylab import *
 from tokenizer_classes import FullTokenizer
 import re
+import os
 re_ = re.compile(' ')
 
 def tokenize_corenlp_direct_version(client, nlu1):
