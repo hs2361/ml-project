@@ -1,5 +1,4 @@
 from matplotlib.pylab import *
-from tokenizer_classes import FullTokenizer
 import re
 import os
 re_ = re.compile(' ')
@@ -46,9 +45,8 @@ def sort_and_generate_pr_w(pr_sql_i):
 
     return pr_wc, pr_wo, pr_wv, pr_sql_i
 
-def process(data,table,model_path,bert_model_type='uncased_L-12_H-768_A-12'):
+def process(data,table,model_path,tokenize,bert_model_type='uncased_L-12_H-768_A-12'):
     vocab_file = os.path.join(model_path, f'vocab_{bert_model_type}.txt')
-    tokenize=FullTokenizer(vocab_file=vocab_file)
     final_all = []
     badcase = 0
     for i, one_data in enumerate(data):
