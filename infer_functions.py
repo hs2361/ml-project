@@ -75,8 +75,7 @@ def sort_and_generate_pr_w(pr_sql_i):
 
     return pr_wc, pr_wo, pr_wv, pr_sql_i
 
-def process(data,table,model_path,tokenize,bert_model_type='uncased_L-12_H-768_A-12'):
-    vocab_file = os.path.join(model_path, f'vocab_{bert_model_type}.txt')
+def process(data,model_path,tokenize,bert_model_type='uncased_L-12_H-768_A-12'):
     final_all = []
     badcase = 0
     for i, one_data in enumerate(data):
@@ -102,12 +101,12 @@ def process(data,table,model_path,tokenize,bert_model_type='uncased_L-12_H-768_A
             total += len(token_)
 
         one_final = one_data
-        one_table = table[one_data["table_id"]]
+        # one_table = table[one_data["table_id"]]
         final_question = [0] * len(nlu_tt1)
         one_final["bertindex_knowledge"] = final_question
-        final_header = [0] * len(one_table["header"])
+        final_header = [0] * len(one_data["header"])
         one_final["header_knowledge"] = final_header
-        for ii,h in enumerate(one_table["header"]):
+        for ii,h in enumerate(one_data["header"]):
             h = h.lower()
             hs = h.split("/")
             for h_ in hs:
@@ -125,7 +124,7 @@ def process(data,table,model_path,tokenize,bert_model_type='uncased_L-12_H-768_A
                         # print("!!!!!")
                         continue
 
-        for ii,h in enumerate(one_table["header"]):
+        for ii,h in enumerate(one_data["header"]):
             h = h.lower()
             hs = h.split("/")
             for h_ in hs:
@@ -138,45 +137,45 @@ def process(data,table,model_path,tokenize,bert_model_type='uncased_L-12_H-768_A
                         # print("!!!!")
                         continue
 
-        for row in one_table["rows"]:
-            for iiii, cell in enumerate(row):
-                cell = str(cell).lower()
-                flag, start_, end_ = contains2(re_.sub('', cell), "".join(one_data["question_tok"]).lower())
-                if flag == True:
-                    final_header[iiii] = 2
+        # for row in one_table["rows"]:
+        #     for iiii, cell in enumerate(row):
+        #         cell = str(cell).lower()
+        #         flag, start_, end_ = contains2(re_.sub('', cell), "".join(one_data["question_tok"]).lower())
+        #         if flag == True:
+        #             final_header[iiii] = 2
 
         one_final["header_knowledge"] = final_header
 
-        for row in one_table["rows"]:
-            for cell in row:
-                cell = str(cell).lower()
-                # cell = cell.replace('"',"")
-                cell_tokens = tokenize.tokenize(cell)
+        # for row in one_table["rows"]:
+        #     for cell in row:
+        #         cell = str(cell).lower()
+        #         # cell = cell.replace('"',"")
+        #         cell_tokens = tokenize.tokenize(cell)
 
 
 
-                if len(cell_tokens)==0:
-                    continue
+        #         if len(cell_tokens)==0:
+        #             continue
 
-                flag, start_, end_ = contains2(re_.sub('', cell),  "".join(one_data["question_tok"]).lower())
-                # flag, start, end = contains(cell_tokens, nlu_tt1)
-                # if flag==False:
-                #     flag, start, end = contains(cell_tokens, nlu_tt2)
-                #     if len(nlu_tt1) != len(nlu_tt2):
-                #         continue
-                if flag == True:
-                    try:
-                        start = t_to_tt_idx1[charindex2wordindex[start_]]
-                        end = t_to_tt_idx1[charindex2wordindex[end_]]
-                        for ii in range(start,end):
-                            final_question[ii] = 2
-                        final_question[start] = 1
-                        final_question[end] = 3
-                        one_final["bertindex_knowledge"] = final_question
-                        break
-                    except:
-                        # print("!!!")
-                        continue
+        #         flag, start_, end_ = contains2(re_.sub('', cell),  "".join(one_data["question_tok"]).lower())
+        #         # flag, start, end = contains(cell_tokens, nlu_tt1)
+        #         # if flag==False:
+        #         #     flag, start, end = contains(cell_tokens, nlu_tt2)
+        #         #     if len(nlu_tt1) != len(nlu_tt2):
+        #         #         continue
+        #         if flag == True:
+        #             try:
+        #                 start = t_to_tt_idx1[charindex2wordindex[start_]]
+        #                 end = t_to_tt_idx1[charindex2wordindex[end_]]
+        #                 for ii in range(start,end):
+        #                     final_question[ii] = 2
+        #                 final_question[start] = 1
+        #                 final_question[end] = 3
+        #                 one_final["bertindex_knowledge"] = final_question
+        #                 break
+        #             except:
+        #                 # print("!!!")
+        #                 continue
         # if i%1000==0:
         #     print(i)
         if "bertindex_knowledge" not in one_final and len(one_final["sql"]["conds"])>0:
