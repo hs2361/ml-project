@@ -83,7 +83,10 @@ def get_fields(data, header_tokenization=False, sql_tokenization=False):
         sql_indexing.append(one_data['sql'])
         sql_query.append(one_data['query'])
         headers.append(one_data['header'])
-        table_indices.append(one_data['table_id'])
+        table_indices.append({
+            "id" : one_data["table_id"],
+            "header": one_data["header"]
+        })
 
         if sql_tokenization:
             tokenized_sql_query.append(one_data['query_tok'])
