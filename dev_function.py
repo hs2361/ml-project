@@ -42,7 +42,7 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
         # Engine for SQL querying.
         engine = DBEngine(os.path.join(path_wikisql, f"train.db"))
 
-        for iB, t in tqdm(enumerate(train_loader)):
+        for iB, t in enumerate(tqdm(train_loader)):
             cnt += len(t)
 
             # if iB > 0:
@@ -216,7 +216,7 @@ def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,pa
         # Engine for SQL querying.
         engine = DBEngine(os.path.join(path_wikisql, f"dev.db"))
 
-        for iB, t in tqdm(enumerate(test_loader)):
+        for iB, t in enumerate(tqdm(test_loader)):
             cnt += len(t)
 
             # if iB > 0:
