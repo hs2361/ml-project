@@ -7,7 +7,7 @@ import load_data
 import bert_training
 import infer_functions
 import torch
-import tqdm
+from tqdm import tqdm
 
 import seq2sql_model_testing
 
