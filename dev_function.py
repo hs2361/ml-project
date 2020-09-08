@@ -7,7 +7,7 @@ import load_data
 import bert_training
 import infer_functions
 import torch
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 
 import seq2sql_model_testing
 
@@ -45,8 +45,8 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
         for iB, t in enumerate(tqdm(train_loader)):
             cnt += len(t)
 
-            # if iB > 0:
-            #     break
+            if iB > 2:
+                break
             # Get fields
             nlu, nlu_t, sql_i, sql_q, sql_t, tb, hs_t, hds = load_data.get_fields(t)
             # nlu  : natural language utterance
@@ -166,7 +166,6 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
             cnt_wv += sum(cnt_wv1_list)
             cnt_lx += sum(cnt_lx1_list)
             cnt_x += sum(cnt_x1_list)
-            print(loss)
 
         ave_loss /= cnt
         acc_sc = cnt_sc / cnt
@@ -219,8 +218,8 @@ def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,pa
         for iB, t in enumerate(tqdm(test_loader)):
             cnt += len(t)
 
-            # if iB > 0:
-            #     break
+            if iB > 2:
+                break
             # Get fields
             nlu, nlu_t, sql_i, sql_q, sql_t, tb, hs_t, hds = load_data.get_fields(t)
             # nlu  : natural language utterance
@@ -309,7 +308,7 @@ def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,pa
             cnt_wvi1_list, cnt_wv1_list = seq2sql_model_training_functions.get_cnt_sw_list(g_sc, g_sa, g_wn, g_wc, g_wo, g_wvi,
                                                             pr_sc, pr_sa, pr_wn, pr_wc, pr_wo, pr_wvi,
                                                             sql_i, pr_sql_i,
-                                                            mode='train')
+                                                            mode='test')
 
             cnt_lx1_list = seq2sql_model_training_functions.get_cnt_lx_list(cnt_sc1_list, cnt_sa1_list, cnt_wn1_list, cnt_wc1_list,
                                             cnt_wo1_list, cnt_wv1_list)
