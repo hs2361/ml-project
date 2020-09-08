@@ -795,7 +795,7 @@ class WOP(nn.Module):
                 knowledge=None,
                 knowledge_header=None):
         # Encode
-        start_time = time.time()
+        loop_start = time.time()
         mL_n = max(l_n)
         bS = len(l_hs)
         print(time.time() - loop_start, "Early stuff")
