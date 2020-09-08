@@ -7,7 +7,6 @@ import load_data
 import bert_training
 import infer_functions
 import torch
-import time
 from tqdm.notebook import tqdm
 import seq2sql_model_testing
 #import torch_xla
@@ -16,7 +15,6 @@ import seq2sql_model_testing
 
 def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,path_wikisql,train_loader):
 
-        start_time = time.time()
         bert_model.train()
         seq2sql_model.train()
         
@@ -46,15 +44,12 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
         # Engine for SQL querying.
         engine = DBEngine(os.path.join(path_wikisql, f"train.db"))
 
-        print(time.time() - start_time, "Before Forward prop loops" )
-
         for iB, t in enumerate(tqdm(train_loader)):
 
-            loop_start = time.time()
             cnt += len(t)
 
-            if iB > 2:
-                break
+            # if iB > 2:
+            #     break
             # Get fields
             nlu, nlu_t, sql_i, sql_q, sql_t, tb, hs_t, hds = load_data.get_fields(t)
             # nlu  : natural language utterance
@@ -73,8 +68,6 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
             nlu_tt, t_to_tt_idx, tt_to_t_idx \
                 = bert_training.get_wemb_bert(bert_configs, bert_model, bert_tokenizer, nlu_t, hds, max_seq_length,
                                 num_out_layers_n=num_target_layers, num_out_layers_h=num_target_layers)
-            print(time.time() - loop_start, "BERT EMbeddings done")
-            loop_start = time.time()
             # wemb_n: natural language embedding
             # wemb_h: header embedding
             # l_n: token lengths of each question
@@ -103,16 +96,11 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
                     knowledge_header.append(k["header_knowledge"])
                 else:
                     knowledge_header.append(max(l_hs) * [0])
-            print(time.time() - loop_start, "Stuff before model forward prop")
-            loop_start = time.time()
             # score
             s_sc, s_sa, s_wn, s_wc, s_wo, s_wv = seq2sql_model(wemb_n, l_n, wemb_h, l_hpu, l_hs,
                                                         g_sc=g_sc, g_sa=g_sa, g_wn=g_wn, g_wc=g_wc,g_wo=g_wo, g_wvi=g_wvi,
                                                         knowledge = knowledge,
                                                         knowledge_header = knowledge_header)
-
-            print(time.time() - loop_start, "model forward prop")
-            loop_start = time.time()
 
             # Calculate loss & step
             loss = seq2sql_model_training_functions.Loss_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, g_sc, g_sa, g_wn, g_wc, g_wo, g_wvi)
@@ -138,13 +126,9 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
                 # at intermediate stage, just accumulates the gradients
                 loss.backward()
 
-            print(time.time() - loop_start, 'backprop')
-            loop_start=time.time()
             # Prediction
             pr_sc, pr_sa, pr_wn, pr_wc, pr_wo, pr_wvi = seq2sql_model_training_functions.pred_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, )
             pr_wv_str, pr_wv_str_wp = seq2sql_model_training_functions.convert_pr_wvi_to_string(pr_wvi, nlu_t, nlu_tt, tt_to_t_idx, nlu)
-            print(time.time() - loop_start, 'pred sw se')
-            loop_start=time.time()
             # Sort pr_wc:
             #   Sort pr_wc when training the model as pr_wo and pr_wvi are predicted using ground-truth where-column (g_wc)
             #   In case of 'dev' or 'test', it is not necessary as the ground-truth is not used during inference.
@@ -152,8 +136,6 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
             pr_sql_i = seq2sql_model_training_functions.generate_sql_i(pr_sc, pr_sa, pr_wn, pr_wc_sorted, pr_wo, pr_wv_str, nlu)
             g_sql_q = seq2sql_model_testing.generate_sql_q(sql_i, tb)
             pr_sql_q = seq2sql_model_testing.generate_sql_q(pr_sql_i, tb)
-            print(time.time() - loop_start, 'sql q')
-            loop_start=time.time()
             # Cacluate accuracy
             cnt_sc1_list, cnt_sa1_list, cnt_wn1_list, \
             cnt_wc1_list, cnt_wo1_list, \
@@ -165,12 +147,8 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
             cnt_lx1_list = seq2sql_model_training_functions.get_cnt_lx_list(cnt_sc1_list, cnt_sa1_list, cnt_wn1_list, cnt_wc1_list,
                                             cnt_wo1_list, cnt_wv1_list)
             # lx stands for logical form accuracy
-            print(time.time() - loop_start, 'Some accuracy stuff')
-            loop_start=time.time()
             # Execution accuracy test.
-            cnt_x1_list, g_ans, pr_ans = seq2sql_model_training_functions.get_cnt_x_list(engine, tb, g_sc, g_sa, sql_i, pr_sc, pr_sa, pr_sql_i)
-            print(time.time() - loop_start, 'exec acc')
-            loop_start=time.time()
+            cnt_x1_list, g_ans, pr_ans = seq2sql_model_training_functions.get_cnt_x_list(engine, tb, g_sc, g_sa, sql_i, pr_sc, pr_sa, pr_sql_i))
             # statistics
             ave_loss += loss.item()
 
@@ -184,8 +162,6 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
             cnt_wv += sum(cnt_wv1_list)
             cnt_lx += sum(cnt_lx1_list)
             cnt_x += sum(cnt_x1_list)
-            print(time.time() - loop_start, 'iB loop ends')
-            loop_start=time.time()
 
         ave_loss /= cnt
         acc_sc = cnt_sc / cnt
@@ -198,8 +174,6 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
         acc_lx = cnt_lx / cnt
         acc_x = cnt_x / cnt
 
-        acc = [ave_loss, acc_sc, acc_sa, acc_wn, acc_wc, acc_wo, acc_wvi, acc_wv, acc_lx, acc_x]
-        print(time.time() - loop_start, "one loop ends")
         return acc
 
 
@@ -238,8 +212,8 @@ def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,pa
         for iB, t in enumerate(tqdm(test_loader)):
             cnt += len(t)
 
-            if iB > 2:
-                break
+            # if iB > 2:
+            #     break
             # Get fields
             nlu, nlu_t, sql_i, sql_q, sql_t, tb, hs_t, hds = load_data.get_fields(t)
             # nlu  : natural language utterance
