@@ -1,6 +1,6 @@
 import torch
-import torch_xla
-import torch_xla.core.xla_model as xm
+#import torch_xla
+#import torch_xla.core.xla_model as xm
 import os
 from seq2sql_model_classes import Seq2SQL_v1
 from bert_model_classes import BertConfig

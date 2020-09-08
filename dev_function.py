@@ -10,8 +10,8 @@ import torch
 import time
 from tqdm.notebook import tqdm
 import seq2sql_model_testing
-import torch_xla
-import torch_xla.core.xla_model as xm
+#import torch_xla
+#import torch_xla.core.xla_model as xm
 
 
 def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,path_wikisql,train_loader):

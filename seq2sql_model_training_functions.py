@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from matplotlib.pylab import *
 from copy import deepcopy
-import torch_xla
-import torch_xla.core.xla_model as xm
+#import torch_xla
+#import torch_xla.core.xla_model as xm
 
 device = torch.device("cuda")
 
