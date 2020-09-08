@@ -795,8 +795,11 @@ class WOP(nn.Module):
                 knowledge=None,
                 knowledge_header=None):
         # Encode
+        start_time = time.time()
         mL_n = max(l_n)
         bS = len(l_hs)
+        print(time.time() - loop_start, "Early stuff")
+        loop_start = time.time()
         if not wenc_n:
             wenc_n = encode(self.enc_n, wemb_n, l_n,
                             return_hidden=False,
@@ -810,7 +813,8 @@ class WOP(nn.Module):
                                                                                       index=knowledge,
                                                                                       value=1).to(device)
                 wenc_n = torch.cat([wenc_n, feature], -1)
-
+        print(time.time() - loop_start, "If not wenc n ends")
+        loop_start = time.time()
         wenc_hs = encode_hpu(self.enc_h, wemb_hpu, l_hpu, l_hs)  # [b, hs, dim]
         if self.header_knowledge_dim != 0:
             knowledge_header = [k + (max(l_hs) - len(k)) * [0]
@@ -820,7 +824,8 @@ class WOP(nn.Module):
                                                                                       index=knowledge_header,
                                                                                       value=1).to(device)
             wenc_hs = torch.cat([wenc_hs, feature2], -1)
-
+        print(time.time() - loop_start, "Some header stuff")
+        loop_start = time.time()
         bS = len(l_hs)
         # wn
 
@@ -845,7 +850,8 @@ class WOP(nn.Module):
         att = torch.matmul(self.W_att(wenc_n).unsqueeze(1),
                            wenc_hs_ob.unsqueeze(3)
                            ).squeeze(3)
-
+        print(time.time() - loop_start, "Torch matmul")
+        loop_start = time.time()
         # Penalty for blank part.
         mL_n = max(l_n)
         for b, l_n1 in enumerate(l_n):
@@ -883,7 +889,8 @@ class WOP(nn.Module):
 
         vec = torch.cat([self.W_c(c_n), self.W_hs(wenc_hs_ob)], dim=2)
         s_wo = self.wo_out(vec)
-
+        print(time.time() - loop_start, "End")
+        loop_start = time.time()
         return s_wo
 
 
