@@ -45,8 +45,8 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
         for iB, t in enumerate(tqdm(train_loader)):
             cnt += len(t)
 
-            if iB > 2:
-                break
+            # if iB > 2:
+            #     break
             # Get fields
             nlu, nlu_t, sql_i, sql_q, sql_t, tb, hs_t, hds = load_data.get_fields(t)
             # nlu  : natural language utterance
@@ -218,8 +218,8 @@ def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,pa
         for iB, t in enumerate(tqdm(test_loader)):
             cnt += len(t)
 
-            if iB > 2:
-                break
+            # if iB > 2:
+            #     break
             # Get fields
             nlu, nlu_t, sql_i, sql_q, sql_t, tb, hs_t, hds = load_data.get_fields(t)
             # nlu  : natural language utterance
