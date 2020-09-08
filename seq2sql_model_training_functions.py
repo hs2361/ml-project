@@ -82,12 +82,25 @@ def Loss_wv_se(s_wv, g_wn, g_wvi):
     return loss
 
 def pred_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv):
+    start_time = time.time()
     pr_sc = pred_sc(s_sc)
+    print(time.time() - start_time, "A")
+    start_time = time.time()
     pr_sa = pred_sa(s_sa)
+    print(time.time() - start_time, "B")
+    start_time = time.time()
     pr_wn = pred_wn(s_wn)
+    print(time.time() - start_time, "C")
+    start_time = time.time()
     pr_wc = pred_wc(pr_wn, s_wc)
+    print(time.time() - start_time, "D")
+    start_time = time.time()
     pr_wo = pred_wo(pr_wn, s_wo)
+    print(time.time() - start_time, "E")
+    start_time = time.time()
     pr_wvi = pred_wvi_se(pr_wn, s_wv)
+    print(time.time() - start_time, "F")
+    start_time = time.time()
 
     return pr_sc, pr_sa, pr_wn, pr_wc, pr_wo, pr_wvi
 
