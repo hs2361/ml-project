@@ -7,12 +7,14 @@ import load_data
 import bert_training
 import infer_functions
 import torch
+import time
 from tqdm.notebook import tqdm
 
 import seq2sql_model_testing
 
 def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,path_wikisql,train_loader):
 
+        start_time = time.time()
         bert_model.train()
         seq2sql_model.train()
         
@@ -42,7 +44,11 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
         # Engine for SQL querying.
         engine = DBEngine(os.path.join(path_wikisql, f"train.db"))
 
+        print(time.time() - start_time, "Before Forward prop loops" )
+
         for iB, t in enumerate(tqdm(train_loader)):
+
+            loop_start = time.time()
             cnt += len(t)
 
             # if iB > 2:
@@ -65,7 +71,8 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
             nlu_tt, t_to_tt_idx, tt_to_t_idx \
                 = bert_training.get_wemb_bert(bert_configs, bert_model, bert_tokenizer, nlu_t, hds, max_seq_length,
                                 num_out_layers_n=num_target_layers, num_out_layers_h=num_target_layers)
-
+            print(time.time() - loop_start, "BERT EMbeddings done")
+            loop_start = time.time()
             # wemb_n: natural language embedding
             # wemb_h: header embedding
             # l_n: token lengths of each question
@@ -94,13 +101,16 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
                     knowledge_header.append(k["header_knowledge"])
                 else:
                     knowledge_header.append(max(l_hs) * [0])
-
+            print(time.time() - loop_start, "Stuff before model forward prop")
+            loop_start = time.time()
             # score
             s_sc, s_sa, s_wn, s_wc, s_wo, s_wv = seq2sql_model(wemb_n, l_n, wemb_h, l_hpu, l_hs,
                                                         g_sc=g_sc, g_sa=g_sa, g_wn=g_wn, g_wc=g_wc, g_wvi=g_wvi,
                                                         knowledge = knowledge,
                                                         knowledge_header = knowledge_header)
 
+            print(time.time() - loop_start, "model forward prop")
+            loop_start = time.time()
 
             # Calculate loss & step
             loss = seq2sql_model_training_functions.Loss_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, g_sc, g_sa, g_wn, g_wc, g_wo, g_wvi)
@@ -126,6 +136,8 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
                 # at intermediate stage, just accumulates the gradients
                 loss.backward()
 
+            print(time.time() - loop_start, 'backprop')
+            loop_start=time.time()
             # Prediction
             pr_sc, pr_sa, pr_wn, pr_wc, pr_wo, pr_wvi = seq2sql_model_training_functions.pred_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, )
             pr_wv_str, pr_wv_str_wp = seq2sql_model_training_functions.convert_pr_wvi_to_string(pr_wvi, nlu_t, nlu_tt, tt_to_t_idx, nlu)
@@ -179,7 +191,7 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
         acc_x = cnt_x / cnt
 
         acc = [ave_loss, acc_sc, acc_sa, acc_wn, acc_wc, acc_wo, acc_wvi, acc_wv, acc_lx, acc_x]
-
+        print(time.time() - loop_start, "one loop ends")
         return acc
 
 
