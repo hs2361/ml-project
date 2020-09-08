@@ -11,6 +11,10 @@ import torch
 import torchvision.datasets as dsets
 import torch.nn as nn
 import torch.nn.functional as F
+import torch_xla
+import torch_xla.core.xla_model as xm
+
+device = xm.xla_device()
 
 
 
@@ -52,8 +56,8 @@ def encode(lstm, wemb_l, l, return_hidden=False, hc0=None, last_only=False):
 
     if return_hidden:
         # hout.shape = [number_of_directoin * num_of_layer, seq_len(=batch size), dim * number_of_direction ] w/ batch_first.. w/o batch_first? I need to see.
-        hout = hout[:, perm_idx_inv]
-        cout = cout[:, perm_idx_inv]  # Is this correct operation?
+        hout = hout[:, perm_idx_inv].to(device)
+        cout = cout[:, perm_idx_inv].to(device)  # Is this correct operation?
 
         return wenc, hout, cout
     else:
@@ -73,7 +77,7 @@ def encode_hpu(lstm, wemb_hpu, l_hpu, l_hs):
     hS = wenc_hpu.size(-1)
 
     wenc_hs = wenc_hpu.new_zeros(len(l_hs), max(l_hs), hS)
-    wenc_hs = wenc_hs
+    wenc_hs = wenc_hs.to(device)
 
     # Re-pack according to batch.
     # ret = [B_NLq, max_len_headers_all, dim_lstm]

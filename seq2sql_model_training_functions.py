@@ -3,6 +3,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 from matplotlib.pylab import *
 from copy import deepcopy
+import torch_xla
+import torch_xla.core.xla_model as xm
+
+device = xm.xla_device()
 
 
 def Loss_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, g_sc, g_sa, g_wn, g_wc, g_wo, g_wvi):
@@ -13,9 +17,9 @@ def Loss_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, g_sc, g_sa, g_wn, g_wc, g_wo,
     :return:
     """
     loss = 0
-    loss += F.cross_entropy(s_sc, torch.tensor(g_sc))
-    loss += F.cross_entropy(s_sa, torch.tensor(g_sa))
-    loss += F.cross_entropy(s_wn, torch.tensor(g_wn))
+    loss += F.cross_entropy(s_sc, torch.tensor(g_sc).to(device))
+    loss += F.cross_entropy(s_sa, torch.tensor(g_sa).to(device))
+    loss += F.cross_entropy(s_wn, torch.tensor(g_wn).to(device))
     loss += Loss_wc(s_wc, g_wc)
     loss += Loss_wo(s_wo, g_wn, g_wo)
     loss += Loss_wv_se(s_wv, g_wn, g_wvi)
@@ -27,7 +31,7 @@ def Loss_wc(s_wc, g_wc):
 
     # Construct index matrix
     bS, max_h_len = s_wc.shape
-    im = torch.zeros([bS, max_h_len])
+    im = torch.zeros([bS, max_h_len]).to(device)
     for b, g_wc1 in enumerate(g_wc):
         for g_wc11 in g_wc1:
             im[b, g_wc11] = 1.0
@@ -47,7 +51,7 @@ def Loss_wo(s_wo, g_wn, g_wo):
             continue
         g_wo1 = g_wo[b]
         s_wo1 = s_wo[b]
-        loss += F.cross_entropy(s_wo1[:g_wn1], torch.tensor(g_wo1))
+        loss += F.cross_entropy(s_wo1[:g_wn1], torch.tensor(g_wo1).to(device))
 
     return loss
 
@@ -57,14 +61,14 @@ def Loss_wv_se(s_wv, g_wn, g_wvi):
     g_wvi:  [ [1, 3, 2], [4,3] ] (when B=2, wn(b=1) = 3, wn(b=2) = 2).
     """
     loss = 0
-    # g_wvi = torch.tensor(g_wvi)
+    # g_wvi = torch.tensor(g_wvi).to(device)
     for b, g_wvi1 in enumerate(g_wvi):
         # for i_wn, g_wvi11 in enumerate(g_wvi1):
 
         g_wn1 = g_wn[b]
         if g_wn1 == 0:
             continue
-        g_wvi1 = torch.tensor(g_wvi1)
+        g_wvi1 = torch.tensor(g_wvi1).to(device)
         g_st1 = g_wvi1[:,0]
         g_ed1 = g_wvi1[:,1]
         # loss from the start position

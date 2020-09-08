@@ -1,4 +1,9 @@
 import torch
+import torch_xla
+import torch_xla.core.xla_model as xm
+
+device = xm.xla_device()
+
 
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -211,9 +216,9 @@ def get_bert_output(model_bert, tokenizer, nlu_t, hds, max_seq_length):
         i_hds.append(i_hds1)
 
     # Convert to tensor
-    all_input_ids = torch.tensor(input_ids, dtype=torch.long)
-    all_input_mask = torch.tensor(input_mask, dtype=torch.long)
-    all_segment_ids = torch.tensor(segment_ids, dtype=torch.long)
+    all_input_ids = torch.tensor(input_ids, dtype=torch.long).to(device)
+    all_input_mask = torch.tensor(input_mask, dtype=torch.long).to(device)
+    all_segment_ids = torch.tensor(segment_ids, dtype=torch.long).to(device)
 
     # 4. Generate BERT output.
     all_encoder_layer, pooled_output = model_bert(all_input_ids, all_segment_ids, all_input_mask)
@@ -280,7 +285,7 @@ def get_wemb_n(i_nlu, l_n, hS, num_hidden_layers, all_encoder_layer, num_out_lay
     """
     bS = len(l_n)
     l_n_max = max(l_n)
-    wemb_n = torch.zeros([bS, l_n_max, hS * num_out_layers_n])
+    wemb_n = torch.zeros([bS, l_n_max, hS * num_out_layers_n]).to(device)
     for b in range(bS):
         # [B, max_len, dim]
         # Fill zero for non-exist part.
@@ -305,7 +310,7 @@ def get_wemb_h(i_hds, l_hpu, l_hs, hS, num_hidden_layers, all_encoder_layer, num
     bS = len(l_hs)
     l_hpu_max = max(l_hpu)
     num_of_all_hds = sum(l_hs)
-    wemb_h = torch.zeros([num_of_all_hds, l_hpu_max, hS * num_out_layers_h])
+    wemb_h = torch.zeros([num_of_all_hds, l_hpu_max, hS * num_out_layers_h]).to(device)
     b_pu = -1
     for b, i_hds1 in enumerate(i_hds):
         for b1, i_hds11 in enumerate(i_hds1):

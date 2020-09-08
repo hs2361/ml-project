@@ -1,9 +1,13 @@
 import torch
+import torch_xla
+import torch_xla.core.xla_model as xm
 import os
 from seq2sql_model_classes import Seq2SQL_v1
 from bert_model_classes import BertConfig
 from tokenizer_classes import FullTokenizer
 from bert_model_classes import BertModel
+
+device = xm.xla_device()
 
 def get_bert_model(model_path, bert_model_type = 'uncased_L-12_H-768_A-12', no_pretraining = False,load_pretrained_model = False):
     '''
@@ -53,7 +57,7 @@ def get_bert_model(model_path, bert_model_type = 'uncased_L-12_H-768_A-12', no_p
     else:
         model_bert.load_state_dict(torch.load(initial_checkpoint, map_location='cpu'))
         print("Load pre-trained parameters.")
-    model_bert
+    model_bert.to(device)
 
     # If we have to load a already trained model
     if load_pretrained_model:
@@ -64,7 +68,7 @@ def get_bert_model(model_path, bert_model_type = 'uncased_L-12_H-768_A-12', no_p
         else:
             res = torch.load(model_path, map_location='cpu')
         model_bert.load_state_dict(res['model_bert'])
-        model_bert
+        model_bert.to(device)
 
     return model_bert, bert_tokenizer, bert_config
 
@@ -102,7 +106,7 @@ def get_seq2sql_model(bert_hidden_layer_size, number_of_layers = 2,
     number_of_neurons = bert_hidden_layer_size * number_of_layers  # Seq-to-SQL input vector dimenstion
 
     model = Seq2SQL_v1(number_of_neurons, hidden_vector_dimensions, number_lstm_layers, dropout_rate, len(sql_conditional_operators), len(sql_main_operators))
-    model = model
+    model = model.to(device)
 
     if load_pretrained_model:
         assert model_path != None

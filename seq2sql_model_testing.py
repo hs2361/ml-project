@@ -1,4 +1,8 @@
+import torch
+import torch_xla
+import torch_xla.core.xla_model as xm
 
+device = xm.xla_device()
 
 def generate_sql_q(sql_i, tb):
     sql_q = []
