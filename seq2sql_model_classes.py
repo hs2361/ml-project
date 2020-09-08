@@ -2,7 +2,7 @@ import os
 import json
 from copy import deepcopy
 from matplotlib.pylab import *
-
+import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -39,7 +39,7 @@ class Seq2SQL_v1(nn.Module):
                 show_p_wn=False, show_p_wc=False, show_p_wo=False, show_p_wv=False,
                 knowledge=None,
                 knowledge_header=None):
-
+        start_time = time.time()
         # sc
         s_sc = self.scp(wemb_n, l_n, wemb_h, l_hpu, l_hs, show_p_sc=show_p_sc,
                         knowledge=knowledge, knowledge_header=knowledge_header)
@@ -48,7 +48,8 @@ class Seq2SQL_v1(nn.Module):
             pr_sc = g_sc
         else:
             pr_sc = pred_sc(s_sc)
-
+        print(time.time() - start_time(), "Select Clause Done")
+        start_time = time.time()
         # sa
         s_sa = self.sap(wemb_n, l_n, wemb_h, l_hpu, l_hs, pr_sc, show_p_sa=show_p_sa,
                         knowledge=knowledge, knowledge_header=knowledge_header)
@@ -57,7 +58,8 @@ class Seq2SQL_v1(nn.Module):
             pr_sa = g_sa
         else:
             pr_sa = pred_sa(s_sa)
-
+        print(time.time() - start_time(), "Select Aggregate Done")
+        start_time = time.time()
         # wn
         s_wn = self.wnp(wemb_n, l_n, wemb_h, l_hpu, l_hs, show_p_wn=show_p_wn,
                         knowledge=knowledge, knowledge_header=knowledge_header)
@@ -66,7 +68,8 @@ class Seq2SQL_v1(nn.Module):
             pr_wn = g_wn
         else:
             pr_wn = pred_wn(s_wn)
-
+        print(time.time() - start_time(), "Where number Done")
+        start_time = time.time()
         # wc
         s_wc = self.wcp(wemb_n, l_n, wemb_h, l_hpu, l_hs, show_p_wc=show_p_wc, penalty=True, predict_select_column=pr_sc,
                         knowledge=knowledge, knowledge_header=knowledge_header)
@@ -75,7 +78,8 @@ class Seq2SQL_v1(nn.Module):
             pr_wc = g_wc
         else:
             pr_wc = pred_wc(pr_wn, s_wc)
-
+        print(time.time() - start_time(), "Where Clause Done")
+        start_time = time.time()
         # for b, columns in enumerate(pr_wc):
         #     for c in columns:
         #         s_sc[b, c] = -1e+10
@@ -88,11 +92,13 @@ class Seq2SQL_v1(nn.Module):
             pr_wo = g_wo
         else:
             pr_wo = pred_wo(pr_wn, s_wo)
-
+        print(time.time() - start_time(), "WHere Operator Done")
+        start_time = time.time()
         # wv
         s_wv = self.wvp(wemb_n, l_n, wemb_h, l_hpu, l_hs, wn=pr_wn, wc=pr_wc, wo=pr_wo, show_p_wv=show_p_wv,
                         knowledge=knowledge, knowledge_header=knowledge_header)
-
+        print(time.time() - start_time(), "Where Value Done")
+        start_time = time.time()
         return s_sc, s_sa, s_wn, s_wc, s_wo, s_wv
 
     def beam_forward(self, wemb_n, l_n, wemb_hpu, l_hpu, l_hs, engine, tb,
