@@ -148,7 +148,7 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
                                             cnt_wo1_list, cnt_wv1_list)
             # lx stands for logical form accuracy
             # Execution accuracy test.
-            cnt_x1_list, g_ans, pr_ans = seq2sql_model_training_functions.get_cnt_x_list(engine, tb, g_sc, g_sa, sql_i, pr_sc, pr_sa, pr_sql_i))
+            cnt_x1_list, g_ans, pr_ans = seq2sql_model_training_functions.get_cnt_x_list(engine, tb, g_sc, g_sa, sql_i, pr_sc, pr_sa, pr_sql_i)
             # statistics
             ave_loss += loss.item()
 
