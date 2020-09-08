@@ -7,7 +7,7 @@ from bert_model_classes import BertConfig
 from tokenizer_classes import FullTokenizer
 from bert_model_classes import BertModel
 
-device = xm.xla_device()
+device = torch.device("cuda")
 
 def get_bert_model(model_path, bert_model_type = 'uncased_L-12_H-768_A-12', no_pretraining = False,load_pretrained_model = False):
     '''

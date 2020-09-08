@@ -10,7 +10,7 @@ from seq2sql_model_internal_functions import *
 import torch_xla
 import torch_xla.core.xla_model as xm
 
-device = xm.xla_device()
+device = torch.device("cuda")
 
 
 class Seq2SQL_v1(nn.Module):

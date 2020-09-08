@@ -11,10 +11,10 @@ import torch
 import torchvision.datasets as dsets
 import torch.nn as nn
 import torch.nn.functional as F
-import torch_xla
-import torch_xla.core.xla_model as xm
+# import torch_xla
+# import torch_xla.core.xla_model as xm
 
-device = xm.xla_device()
+# device = torch.device("cuda")
 
 
 

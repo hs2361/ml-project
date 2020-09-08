@@ -125,15 +125,15 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
                     opt_bert.zero_grad()
                 loss.backward()
                 if accumulate_gradients == 1:
-                    xm.optimizer_step(opt)
+                    opt.step()
                     if opt_bert:
-                        xm.optimizer_step(opt_bert)
+                        opt_bert.step()
             elif iB % accumulate_gradients == (accumulate_gradients - 1):
                 # at the final, take step with accumulated graident
                 loss.backward()
-                xm.optimizer_step(opt)
+                opt.step()
                 if opt_bert:
-                    xm.optimizer_step(opt_bert)
+                    opt_bert.step()
             else:
                 # at intermediate stage, just accumulates the gradients
                 loss.backward()
