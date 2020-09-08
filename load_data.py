@@ -85,7 +85,8 @@ def get_fields(data, header_tokenization=False, sql_tokenization=False):
         headers.append(one_data['header'])
         table_indices.append({
             "id" : one_data["table_id"],
-            "header": one_data["header"]
+            "header": one_data["header"],
+            "types" : one_data["types"]
         })
 
         if sql_tokenization:
