@@ -143,7 +143,8 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
             # Prediction
             pr_sc, pr_sa, pr_wn, pr_wc, pr_wo, pr_wvi = seq2sql_model_training_functions.pred_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, )
             pr_wv_str, pr_wv_str_wp = seq2sql_model_training_functions.convert_pr_wvi_to_string(pr_wvi, nlu_t, nlu_tt, tt_to_t_idx, nlu)
-
+            print(time.time() - loop_start, 'pred sw se')
+            loop_start=time.time()
             # Sort pr_wc:
             #   Sort pr_wc when training the model as pr_wo and pr_wvi are predicted using ground-truth where-column (g_wc)
             #   In case of 'dev' or 'test', it is not necessary as the ground-truth is not used during inference.
@@ -151,7 +152,8 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
             pr_sql_i = seq2sql_model_training_functions.generate_sql_i(pr_sc, pr_sa, pr_wn, pr_wc_sorted, pr_wo, pr_wv_str, nlu)
             g_sql_q = seq2sql_model_testing.generate_sql_q(sql_i, tb)
             pr_sql_q = seq2sql_model_testing.generate_sql_q(pr_sql_i, tb)
-
+            print(time.time() - loop_start, 'sql q')
+            loop_start=time.time()
             # Cacluate accuracy
             cnt_sc1_list, cnt_sa1_list, cnt_wn1_list, \
             cnt_wc1_list, cnt_wo1_list, \
@@ -163,10 +165,12 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
             cnt_lx1_list = seq2sql_model_training_functions.get_cnt_lx_list(cnt_sc1_list, cnt_sa1_list, cnt_wn1_list, cnt_wc1_list,
                                             cnt_wo1_list, cnt_wv1_list)
             # lx stands for logical form accuracy
-
+            print(time.time() - loop_start, 'Some accuracy stuff')
+            loop_start=time.time()
             # Execution accuracy test.
             cnt_x1_list, g_ans, pr_ans = seq2sql_model_training_functions.get_cnt_x_list(engine, tb, g_sc, g_sa, sql_i, pr_sc, pr_sa, pr_sql_i)
-
+            print(time.time() - loop_start, 'exec acc')
+            loop_start=time.time()
             # statistics
             ave_loss += loss.item()
 
@@ -180,6 +184,8 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
             cnt_wv += sum(cnt_wv1_list)
             cnt_lx += sum(cnt_lx1_list)
             cnt_x += sum(cnt_x1_list)
+            print(time.time() - loop_start, 'iB loop ends')
+            loop_start=time.time()
 
         ave_loss /= cnt
         acc_sc = cnt_sc / cnt
