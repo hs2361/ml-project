@@ -79,7 +79,7 @@ def get_fields(data, header_tokenization=False, sql_tokenization=False):
 
     for one_data in data:
         natural_language_utterance.append(one_data['question'])
-        nlu_roberta_encoding.append(one_data['roberta_enc'])
+        natural_language_utterance_tokenized.append(one_data['question_tok'])
         sql_indexing.append(one_data['sql'])
         sql_query.append(one_data['query'])
         headers.append(one_data['header'])
@@ -99,7 +99,7 @@ def get_fields(data, header_tokenization=False, sql_tokenization=False):
         else:
             tokenized_headers.append(None)
         
-    return natural_language_utterance,nlu_roberta_encoding,sql_indexing,sql_query,tokenized_sql_query,table_indices,tokenized_headers,headers
+    return natural_language_utterance,natural_language_utterance_tokenized,sql_indexing,sql_query,tokenized_sql_query,table_indices,tokenized_headers,headers
 
 # def get_fields_1(t1, tables, no_hs_t=False, no_sql_t=False):
 #     nlu1 = t1['question']

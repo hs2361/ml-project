@@ -19,6 +19,7 @@ config["toy_model"] = False
 config["toy_size"] = 12
 config["accumulate_gradients"] = 2
 config["EG"] = False
+tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 
 
 def get_loader_wikisql(data_train, data_dev, bS, shuffle_train=True, shuffle_dev=False):
@@ -121,11 +122,11 @@ def get_data(path_wikisql, args):
 #     else:
 #         return False,-1,-1
 
-# def contains(small_list, big_list):
-#     for i in range(len(big_list)-len(small_list)+1):
-#         if big_list[i:i+len(small_list)]==small_list:
-#             return True,i, i+len(small_list)
-#     return False,-1,-1
+def contains(small_list, big_list):
+    for i in range(len(big_list)-len(small_list)+1):
+        if big_list[i:i+len(small_list)]==small_list:
+            return True,i, i+len(small_list)
+    return False,-1,-1
 
 # def contains(small_list,big_list):
 #     result = False
@@ -151,7 +152,6 @@ train_data, train_table, dev_data, dev_table, train_loader, dev_loader = get_dat
 count = 0
 count_agg_0 = 0
 count_agg_not_0 = 0
-tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
 
 def process(data,table,output_name):
   final_all = []
@@ -213,6 +213,19 @@ def process(data,table,output_name):
         final_header[ii] = temp/len(h_enc)
 
     one_final['header_knowledge'] = final_header
+
+    where_val_indices = []
+
+    for cond in one_data['sql']['conds']:
+        where_val = cond[2]
+        where_val = tokenizer.encode(where_val, add_prefix_space=True)[1:-1]
+        is_sub, start_index, end_index = contains(where_val, nlu_t)
+        if(is_sub):
+            where_val_indices.append([start_index, end_index])
+        else:
+            print("missing where value!")
+    
+    one_final['wvi_corenlp'] = where_val_indices
     
     # for i,h_enc in header_enc:
     #     is_sublist,start_index,end_index = contains(h_enc,nlu_t)
