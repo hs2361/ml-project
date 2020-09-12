@@ -121,11 +121,11 @@ def get_data(path_wikisql, args):
 #     else:
 #         return False,-1,-1
 
-def contains(small_list, big_list):
-    for i in range(len(big_list)-len(small_list)+1):
-        if big_list[i:i+len(small_list)]==small_list:
-            return True,i, i+len(small_list)
-    return False,-1,-1
+# def contains(small_list, big_list):
+#     for i in range(len(big_list)-len(small_list)+1):
+#         if big_list[i:i+len(small_list)]==small_list:
+#             return True,i, i+len(small_list)
+#     return False,-1,-1
 
 # def contains(small_list,big_list):
 #     result = False
@@ -198,15 +198,30 @@ def process(data,table,output_name):
 
     header_enc = [tokenizer.encode(h.lower(), add_prefix_space=True)[1:-1] for h in one_table["header"]]
 
-    
-    for i,h_enc in header_enc:
-        is_sublist,start_index,end_index = contains(h_enc,nlu_t)
-        if is_sublist:
-            final_question[start_index:end_index] = [4]*(end_index-start_index)
-            final_header[i]=1
-        
+    for ii, nlu_enc in enumerate(nlu_t):
+        for h_enc in header_enc:
+            if nlu_enc in h_enc:
+                final_question[ii] = 4
+
     one_final['bertindex_knowledge'] = final_question
+
+    for ii, h_enc in enumerate(header_enc):
+        temp = 0
+        for enc in h_enc:
+            if enc in nlu_t:
+                temp += 1
+        final_header[ii] = temp/len(h_enc)
+
     one_final['header_knowledge'] = final_header
+    
+    # for i,h_enc in header_enc:
+    #     is_sublist,start_index,end_index = contains(h_enc,nlu_t)
+    #     if is_sublist:
+    #         final_question[start_index:end_index] = [4]*(end_index-start_index)
+    #         final_header[i]=1
+        
+    # one_final['bertindex_knowledge'] = final_question
+    # one_final['header_knowledge'] = final_header
 
     # for ii,h in enumerate(one_table["header"]):
     #     h = h.lower()
