@@ -69,7 +69,7 @@ def get_data(file_path: str,batch_size: int):
 def get_fields(data, header_tokenization=False, sql_tokenization=False):
 
     natural_language_utterance = []
-    nlu_roberta_encoding = []
+    natural_language_utterance_tokenized = []
     sql_indexing = []
     sql_query = []
     tokenized_sql_query = []
