@@ -109,7 +109,7 @@ def get_wemb_bert(bert_config, model_bert, tokenizer, nlu_t, hds, max_seq_length
     # get contextual output of all tokens from bert
     all_encoder_layer, pooled_output, tokens, i_nlu, i_hds,\
     l_n, l_hpu, l_hs, \
-    nlu_tt, t_to_tt_idx, tt_to_t_idx = get_bert_output(model_bert, tokenizer, nlu_t, hds, max_seq_length)
+    nlu_tt, t_to_tt_idx, tt_to_t_idx = get_roberta_output(model_bert, tokenizer, nlu_t, hds, max_seq_length)
     # all_encoder_layer: BERT outputs from all layers.
     # pooled_output: output of [CLS] vec.
     # tokens: BERT intput tokens
@@ -292,7 +292,7 @@ def get_roberta_output(roberta_model, tokenizer, nlu_t, hds, max_seq_length):
 
         # [CLS] nlu [SEP] col1 [SEP] col2 [SEP] ...col-n [SEP]
         # 2. Generate BERT inputs & indices.
-        tokens1, segment_ids1, i_nlu1, i_hds1 = generate_inputs(tokenizer, nlu_tt1, hds1)
+        tokens1, segment_ids1, i_nlu1, i_hds1 = generate_inputs_roberta(tokenizer, nlu_tt1, hds1)
         input_ids1 = tokenizer.convert_tokens_to_ids(tokens1)
 
         # Input masks
@@ -324,7 +324,7 @@ def get_roberta_output(roberta_model, tokenizer, nlu_t, hds, max_seq_length):
     all_segment_ids = torch.tensor(segment_ids, dtype=torch.long).to(device)
 
     # 4. Generate BERT output.
-    all_encoder_layer, pooled_output = model_bert(all_input_ids, all_segment_ids, all_input_mask)
+    all_encoder_layer, pooled_output = roberta_model(all_input_ids, all_segment_ids, all_input_mask)
 
     # 5. generate l_hpu from i_hds
     l_hpu = gen_l_hpu(i_hds)
