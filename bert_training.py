@@ -174,7 +174,7 @@ def get_roberta_output(model_roberta, tokenizer, nlu_t, hds, max_seq_length):
         for (i, token) in enumerate(nlu_t1):
             t_to_tt_idx1.append(
                 len(nlu_tt1))  # all_doc_tokens[ indicate the start position of original 'white-space' tokens.
-            sub_tokens = tokenizer.tokenize(token)
+            sub_tokens = tokenizer.tokenize(token, is_pretokenized=True)
             for sub_token in sub_tokens:
                 tt_to_t_idx1.append(i)
                 nlu_tt1.append(sub_token)  # all_doc_tokens are further tokenized using WordPiece tokenizer
@@ -280,7 +280,7 @@ def get_bert_output(model_bert, tokenizer, nlu_t, hds, max_seq_length):
         for (i, token) in enumerate(nlu_t1):
             t_to_tt_idx1.append(
                 len(nlu_tt1))  # all_doc_tokens[ indicate the start position of original 'white-space' tokens.
-            sub_tokens = tokenizer.tokenize(token)
+            sub_tokens = tokenizer.tokenize(token, is_pretokenized=True)
             for sub_token in sub_tokens:
                 tt_to_t_idx1.append(i)
                 nlu_tt1.append(sub_token)  # all_doc_tokens are further tokenized using WordPiece tokenizer

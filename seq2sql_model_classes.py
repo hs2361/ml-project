@@ -325,7 +325,6 @@ class SCP(nn.Module):
                 knowledge=None,
                 knowledge_header=None):
         # Encode
-        print(l_n)
         mL_n = max(l_n)
         bS = len(l_hs)
         wenc_n = encode(self.enc_n, wemb_n, l_n,
