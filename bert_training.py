@@ -221,7 +221,7 @@ def get_roberta_output(model_roberta, tokenizer, nlu_t, hds, max_seq_length):
     all_segment_ids = torch.tensor(segment_ids, dtype=torch.long).to(device)
 
     # 4. Generate BERT output.
-    all_encoder_layer, pooled_output = model_roberta(all_input_ids, all_segment_ids, all_input_mask)
+    all_encoder_layer, pooled_output = model_roberta(input_ids=all_input_ids, position_ids=all_segment_ids, attention_mask=all_input_mask)
 
     # 5. generate l_hpu from i_hds
     l_hpu = gen_l_hpu(i_hds)
