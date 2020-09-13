@@ -325,6 +325,7 @@ class SCP(nn.Module):
                 knowledge=None,
                 knowledge_header=None):
         # Encode
+        print(l_n)
         mL_n = max(l_n)
         bS = len(l_hs)
         wenc_n = encode(self.enc_n, wemb_n, l_n,
@@ -332,7 +333,6 @@ class SCP(nn.Module):
                         hc0=None,
                         last_only=False)  # [b, n, dim]
         knowledge = [k + (mL_n - len(k)) * [0] for k in knowledge]
-        print(knowledge)
         knowledge = torch.tensor(knowledge).unsqueeze(-1)
 
         feature = torch.zeros(bS, mL_n, self.question_knowledge_dim).scatter_(dim=-1,
