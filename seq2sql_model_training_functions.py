@@ -6,7 +6,7 @@ from copy import deepcopy
 #import torch_xla
 #import torch_xla.core.xla_model as xm
 
-device = torch.device("cuda")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def Loss_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, g_sc, g_sa, g_wn, g_wc, g_wo, g_wvi):

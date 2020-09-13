@@ -8,7 +8,7 @@ from tokenizer_classes import FullTokenizer
 from bert_model_classes import BertModel
 from transformers import RobertaConfig, RobertaModel, RobertaTokenizer
 
-device = torch.device("cuda")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def get_roberta_model():
 
