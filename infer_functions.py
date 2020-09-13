@@ -90,7 +90,7 @@ def process(data,model_path,tokenize,bert_model_type='uncased_L-12_H-768_A-12'):
         for (ii, token) in enumerate(nlu_t1):
             t_to_tt_idx1.append(
                 len(nlu_tt1))  # all_doc_tokens[ indicate the start position of original 'white-space' tokens.
-            sub_tokens = tokenize.tokenize(token)
+            sub_tokens = tokenize.tokenize(token, is_pretokenized=True)
             for sub_token in sub_tokens:
                 tt_to_t_idx1.append(ii)
                 nlu_tt1.append(sub_token)  # all_doc_tokens are further tokenized using WordPiece tokenizer
