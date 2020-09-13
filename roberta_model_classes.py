@@ -22,7 +22,7 @@ import torch.nn as nn
 from torch.nn import CrossEntropyLoss, MSELoss
 
 from bert_model_classes import BertConfig
-from bert_model_classes import BertEmbeddings, BertModel
+from bert_model_classes import BERTEmbeddings, BertModel
 
 _CONFIG_FOR_DOC = "RobertaConfig"
 _TOKENIZER_FOR_DOC = "RobertaTokenizer"
@@ -64,7 +64,7 @@ class RobertaConfig(BertConfig):
         super().__init__(pad_token_id=pad_token_id, bos_token_id=bos_token_id, eos_token_id=eos_token_id, **kwargs)
 
 
-class RobertaEmbeddings(BertEmbeddings):
+class RobertaEmbeddings(BERTEmbeddings):
     """
     Same as BertEmbeddings with a tiny tweak for positional embeddings indexing.
     """
