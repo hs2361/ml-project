@@ -187,6 +187,7 @@ def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,pa
         results=[]
         cnt_list=[]
         ave_loss = 0
+        loss = []
         cnt = 0  # count the # of examples
         cnt_sc = 0  # count the # of correct predictions of select column
         cnt_sa = 0  # of selectd aggregation
@@ -271,23 +272,37 @@ def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,pa
                 else:
                     knowledge_header.append(max(l_hs) * [0])
 
-            # score
-            prob_sca, prob_w, prob_wn_w, pr_sc, pr_sa, pr_wn, pr_sql_i = seq2sql_model.beam_forward(wemb_n, l_n, wemb_h, l_hpu,
-                                                                                            l_hs, engine, tb,
-                                                                                            nlu_t, nlu_tt,
-                                                                                            tt_to_t_idx, nlu,
-                                                                                            beam_size=4,
-                                                       knowledge=knowledge,
-                                                       knowledge_header=knowledge_header)
-            # sort and generate
-            pr_wc, pr_wo, pr_wv, pr_sql_i = infer_functions.sort_and_generate_pr_w(pr_sql_i)
+            s_sc, s_sa, s_wn, s_wc, s_wo, s_wv = seq2sql_model(wemb_n, l_n, wemb_h, l_hpu, l_hs,
+                                                    g_sc=g_sc, g_sa=g_sa, g_wn=g_wn, g_wc=g_wc,g_wo=g_wo, g_wvi=g_wvi,
+                                                    knowledge = knowledge,
+                                                    knowledge_header = knowledge_header)
 
-            # Follosing variables are just for the consistency with no-EG case.
-            pr_wvi = None  # not used
-            pr_wv_str = None
-            pr_wv_str_wp = None
-            loss = torch.tensor([0])
+            # Calculate loss & step
+            loss = seq2sql_model_training_functions.Loss_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, g_sc, g_sa, g_wn, g_wc, g_wo, g_wvi)
 
+            # # score
+            # prob_sca, prob_w, prob_wn_w, pr_sc, pr_sa, pr_wn, pr_sql_i = seq2sql_model.beam_forward(wemb_n, l_n, wemb_h, l_hpu,
+            #                                                                                 l_hs, engine, tb,
+            #                                                                                 nlu_t, nlu_tt,
+            #                                                                                 tt_to_t_idx, nlu,
+            #                                                                                 beam_size=4,
+            #                                            knowledge=knowledge,
+            #                                            knowledge_header=knowledge_header)
+            # # sort and generate
+            # pr_wc, pr_wo, pr_wv, pr_sql_i = infer_functions.sort_and_generate_pr_w(pr_sql_i)
+
+            # # Follosing variables are just for the consistency with no-EG case.
+            # pr_wvi = None  # not used
+            # pr_wv_str = None
+            # pr_wv_str_wp = None
+            # loss = torch.tensor([0])
+            pr_sc, pr_sa, pr_wn, pr_wc, pr_wo, pr_wvi = seq2sql_model_training_functions.pred_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, )
+            pr_wv_str, pr_wv_str_wp = seq2sql_model_training_functions.convert_pr_wvi_to_string(pr_wvi, nlu_t, nlu_tt, tt_to_t_idx, nlu)
+            # Sort pr_wc:
+            #   Sort pr_wc when training the model as pr_wo and pr_wvi are predicted using ground-truth where-column (g_wc)
+            #   In case of 'dev' or 'test', it is not necessary as the ground-truth is not used during inference.
+            pr_wc_sorted = seq2sql_model_training_functions.sort_pr_wc(pr_wc, g_wc)
+            pr_sql_i = seq2sql_model_training_functions.generate_sql_i(pr_sc, pr_sa, pr_wn, pr_wc_sorted, pr_wo, pr_wv_str, nlu)
             g_sql_q = seq2sql_model_testing.generate_sql_q(sql_i, tb)
             pr_sql_q = seq2sql_model_testing.generate_sql_q(pr_sql_i, tb)
 
