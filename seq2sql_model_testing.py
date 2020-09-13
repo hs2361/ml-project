@@ -2,7 +2,7 @@ import torch
 #import torch_xla
 #import torch_xla.core.xla_model as xm
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda")
 
 def generate_sql_q(sql_i, tb):
     sql_q = []
