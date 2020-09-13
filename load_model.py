@@ -6,8 +6,27 @@ from seq2sql_model_classes import Seq2SQL_v1
 from bert_model_classes import BertConfig
 from tokenizer_classes import FullTokenizer
 from bert_model_classes import BertModel
+from transformers import RobertaConfig, RobertaModel, RobertaTokenizer
 
 device = torch.device("cuda")
+
+def get_roberta_model():
+
+    # Initializing a RoBERTa configuration
+    configuration = RobertaConfig()
+
+    # Initializing a model from the configuration
+    Roberta_Model = RobertaModel(configuration).from_pretrained("roberta-base")
+    Roberta_Model.to(device)
+
+    # Accessing the model configuration
+    configuration = Roberta_Model.config
+
+    #get the Roberta Tokenizer
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
+
+    return Roberta_Model, tokenizer, configuration
+
 
 def get_bert_model(model_path, bert_model_type = 'uncased_L-12_H-768_A-12', no_pretraining = False,load_pretrained_model = False):
     '''
