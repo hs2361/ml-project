@@ -15,15 +15,14 @@
 # limitations under the License.
 """PyTorch RoBERTa model. """
 
-
 import warnings
 
 import torch
 import torch.nn as nn
 from torch.nn import CrossEntropyLoss, MSELoss
 
-from .bert_model_classes import BertConfig
-from .bert_model_classes import BertEmbeddings, BertModel
+from bert_model_classes import BertConfig
+from bert_model_classes import BertEmbeddings, BertModel
 
 _CONFIG_FOR_DOC = "RobertaConfig"
 _TOKENIZER_FOR_DOC = "RobertaTokenizer"
