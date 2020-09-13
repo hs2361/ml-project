@@ -97,13 +97,11 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
                 else:
                     knowledge_header.append(max(l_hs) * [0])
             # score
-            try:
-                s_sc, s_sa, s_wn, s_wc, s_wo, s_wv = seq2sql_model(wemb_n, l_n, wemb_h, l_hpu, l_hs,
-                                                        g_sc=g_sc, g_sa=g_sa, g_wn=g_wn, g_wc=g_wc,g_wo=g_wo, g_wvi=g_wvi,
-                                                        knowledge = knowledge,
-                                                        knowledge_header = knowledge_header)
-            except:
-                print(t)
+
+            s_sc, s_sa, s_wn, s_wc, s_wo, s_wv = seq2sql_model(wemb_n, l_n, wemb_h, l_hpu, l_hs,
+                                                    g_sc=g_sc, g_sa=g_sa, g_wn=g_wn, g_wc=g_wc,g_wo=g_wo, g_wvi=g_wvi,
+                                                    knowledge = knowledge,
+                                                    knowledge_header = knowledge_header)
 
             # Calculate loss & step
             loss = seq2sql_model_training_functions.Loss_sw_se(s_sc, s_sa, s_wn, s_wc, s_wo, s_wv, g_sc, g_sa, g_wn, g_wc, g_wo, g_wvi)
