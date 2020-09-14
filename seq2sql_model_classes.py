@@ -87,7 +87,7 @@ class Seq2SQL_v1(nn.Module):
                         knowledge=knowledge, knowledge_header=knowledge_header)
         return s_sc, s_sa, s_wn, s_wc, s_wo, s_wv
 
-    def beam_forward(self, wemb_n, l_n, wemb_hpu, l_hpu, l_hs, engine, tb,
+    def beam_forward(self, wemb_n, l_n, wemb_hpu, l_hpu, l_hs, tb,
                      nlu_t, nlu_wp_t, wp_to_wh_index, nlu,
                      beam_size=4,
                      show_p_sc=False, show_p_sa=False,
@@ -260,12 +260,12 @@ class Seq2SQL_v1(nn.Module):
                 # test execution
                 # print(nlu[b])
                 # print(tb[b]['id'], tb[b]['types'], pr_sc[b], pr_sa[b], [conds11])
-                pr_ans = engine.execute(
-                    tb[b]['id'], pr_sc[b], pr_sa[b], [conds11])
-                if bool(pr_ans):
-                    # pr_ans is not empty!
-                    conds_max1.append(conds11)
-                    prob_conds_max1.append(prob_conds11)
+                # pr_ans = engine.execute(
+                #     tb[b]['id'], pr_sc[b], pr_sa[b], [conds11])
+                # if bool(pr_ans):
+                #     # pr_ans is not empty!
+                conds_max1.append(conds11)
+                prob_conds_max1.append(prob_conds11)
             conds_max.append(conds_max1)
             prob_conds_max.append(prob_conds_max1)
 
