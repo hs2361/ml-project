@@ -13,7 +13,7 @@ import seq2sql_model_testing
 #import torch_xla.core.xla_model as xm
 
 
-def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,path_wikisql,train_loader):
+def train(seq2sql_model,bert_model,model_optimizer,roberta_optimizer,bert_tokenizer,bert_configs,path_wikisql,train_loader):
 
         bert_model.train()
         seq2sql_model.train()
@@ -37,7 +37,7 @@ def train(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,p
         num_target_layers=2
         accumulate_gradients=1 
         check_grad=True
-        opt_bert=None 
+        opt_bert=roberta_optimizer 
         path_db=None
         opt=model_optimizer
 
