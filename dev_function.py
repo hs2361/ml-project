@@ -179,8 +179,8 @@ def train(seq2sql_model,bert_model,model_optimizer,roberta_optimizer,bert_tokeni
         return acc
 
 
-def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,path_wikisql,test_loader):
-
+def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,path_wikisql,test_loader,mode="dev"):
+        
         bert_model.eval()
         seq2sql_model.eval()
 
@@ -210,7 +210,7 @@ def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,pa
         opt=model_optimizer
 
         # Engine for SQL querying.
-        engine = DBEngine(os.path.join(path_wikisql, f"test.db"))
+        engine = DBEngine(os.path.join(path_wikisql, mode+".db"))
 
         for iB, t in enumerate(tqdm(test_loader)):
             cnt += len(t)
