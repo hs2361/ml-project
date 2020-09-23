@@ -210,7 +210,7 @@ def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,pa
         opt=model_optimizer
 
         # Engine for SQL querying.
-        engine = DBEngine(os.path.join(path_wikisql, f"dev.db"))
+        engine = DBEngine(os.path.join(path_wikisql, f"test.db"))
 
         for iB, t in enumerate(tqdm(test_loader)):
             cnt += len(t)
