@@ -66,6 +66,31 @@ def get_data(file_path: str,batch_size: int):
 
     return train_data, train_table, dev_data, dev_table, train_loader, dev_loader
 
+def get_test_data(file_path: str,batch_size: int):
+    test_data=[]
+    test_table = {}
+    
+    with open(file_path + '/test_knowledge.jsonl') as test_data_file:
+        for idx, line in enumerate(test_data_file):
+            current_line = json.loads(line.strip())
+            test_data.append(current_line)
+
+    with open(file_path + '/test.tables.jsonl') as test_table_file:
+        for idx, line in enumerate(test_table_file):
+            current_line = json.loads(line.strip())
+            test_table[current_line['id']] = current_line
+
+    test_loader = torch.utils.data.DataLoader(
+        batch_size=batch_size,
+        dataset=test_data,
+        shuffle=True,
+        num_workers=4,
+        collate_fn=lambda x: x  # now dictionary values are not merged!
+    )
+    
+    return test_data,test_table,test_loader
+
+
 def get_fields(data, header_tokenization=False, sql_tokenization=False):
 
     natural_language_utterance = []
