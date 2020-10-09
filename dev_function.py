@@ -13,9 +13,9 @@ import seq2sql_model_testing
 #import torch_xla.core.xla_model as xm
 
 
-def train(seq2sql_model,bert_model,model_optimizer,roberta_optimizer,bert_tokenizer,bert_configs,path_wikisql,train_loader):
+def train(seq2sql_model,roberta_model,model_optimizer,roberta_optimizer,tokenizer,roberta_configs,path_wikisql,train_loader):
 
-        bert_model.train()
+        roberta_model.train()
         seq2sql_model.train()
         
         results=[]
@@ -37,7 +37,7 @@ def train(seq2sql_model,bert_model,model_optimizer,roberta_optimizer,bert_tokeni
         num_target_layers=2
         accumulate_gradients=1 
         check_grad=True
-        opt_bert=roberta_optimizer 
+        opt_roberta=roberta_optimizer 
         path_db=None
         opt=model_optimizer
 
@@ -66,7 +66,7 @@ def train(seq2sql_model,bert_model,model_optimizer,roberta_optimizer,bert_tokeni
 
             wemb_n, wemb_h, l_n, l_hpu, l_hs, \
             nlu_tt, t_to_tt_idx, tt_to_t_idx \
-                = bert_training.get_wemb_bert(bert_configs, bert_model, bert_tokenizer, nlu_t, hds, max_seq_length,
+                = bert_training.get_wemb_roberta(roberta_configs, roberta_model, tokenizer, nlu_t, hds, max_seq_length,
                                 num_out_layers_n=num_target_layers, num_out_layers_h=num_target_layers)
             # wemb_n: natural language embedding
             # wemb_h: header embedding
@@ -110,19 +110,19 @@ def train(seq2sql_model,bert_model,model_optimizer,roberta_optimizer,bert_tokeni
             if iB % accumulate_gradients == 0:  # mode
                 # at start, perform zero_grad
                 opt.zero_grad()
-                if opt_bert:
-                    opt_bert.zero_grad()
+                if opt_roberta:
+                    opt_roberta.zero_grad()
                 loss.backward()
                 if accumulate_gradients == 1:
                     opt.step()
-                    if opt_bert:
-                        opt_bert.step()
+                    if opt_roberta:
+                        opt_roberta.step()
             elif iB % accumulate_gradients == (accumulate_gradients - 1):
                 # at the final, take step with accumulated graident
                 loss.backward()
                 opt.step()
-                if opt_bert:
-                    opt_bert.step()
+                if opt_roberta:
+                    opt_roberta.step()
             else:
                 # at intermediate stage, just accumulates the gradients
                 loss.backward()
@@ -179,9 +179,9 @@ def train(seq2sql_model,bert_model,model_optimizer,roberta_optimizer,bert_tokeni
         return acc
 
 
-def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,path_wikisql,test_loader,mode="dev"):
+def test(seq2sql_model,roberta_model,model_optimizer,tokenizer,roberta_configs,path_wikisql,test_loader,mode="dev"):
         
-        bert_model.eval()
+        roberta_model.eval()
         seq2sql_model.eval()
 
         results=[]
@@ -205,7 +205,7 @@ def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,pa
         num_target_layers=2
         accumulate_gradients=1 
         check_grad=True
-        opt_bert=None 
+        opt_roberta=None 
         path_db=None
         opt=model_optimizer
 
@@ -233,7 +233,7 @@ def test(seq2sql_model,bert_model,model_optimizer,bert_tokenizer,bert_configs,pa
 
             wemb_n, wemb_h, l_n, l_hpu, l_hs, \
             nlu_tt, t_to_tt_idx, tt_to_t_idx \
-                = bert_training.get_wemb_bert(bert_configs, bert_model, bert_tokenizer, nlu_t, hds, max_seq_length,
+                = bert_training.get_wemb_bert(roberta_configs, roberta_model, tokenizer, nlu_t, hds, max_seq_length,
                                 num_out_layers_n=num_target_layers, num_out_layers_h=num_target_layers)
 
             # wemb_n: natural language embedding
