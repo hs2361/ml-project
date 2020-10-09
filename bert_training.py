@@ -199,14 +199,14 @@ def generate_inputs(tokenizer, nlu1_tok, hds1):
     i_ed_nlu = len(tokens)
     tokens.append("</s>")
 
-    i_hds = []
+    i_headers = []
 
     for i, hds11 in enumerate(hds1):
         i_st_hd = len(tokens)
         sub_tok = tokenizer.tokenize(hds11)
         tokens += sub_tok
         i_ed_hd = len(tokens)
-        i_hds.append((i_st_hd, i_ed_hd))
+        i_headers.append((i_st_hd, i_ed_hd))
         if i < len(hds1)-1:
             tokens.append("</s>")
         elif i == len(hds1)-1:
@@ -216,17 +216,18 @@ def generate_inputs(tokenizer, nlu1_tok, hds1):
 
     i_nlu = (i_st_nlu, i_ed_nlu)
 
-    return tokens, i_nlu, i_hds
+    return tokens, i_nlu, i_headers
 
-def gen_l_hpu(i_hds):
+def gen_l_hpu(i_headers):
     """
     # Treat columns as if it is a batch of natural language utterance with batch-size = # of columns * # of batch_size
-    i_hds = [(17, 18), (19, 21), (22, 23), (24, 25), (26, 29), (30, 34)])
+    i_headers = [(17, 18), (19, 21), (22, 23), (24, 25), (26, 29), (30, 34)])
     """
     l_hpu = []
-    for i_hds1 in i_hds:
-        for i_hds11 in i_hds1:
-            l_hpu.append(i_hds11[1] - i_hds11[0])
+    
+    for i_header in i_headers:
+        for index_pair in i_header:
+            l_hpu.append(index_pair[1] - index_pair[0])
 
     return l_hpu
 
@@ -238,8 +239,7 @@ def get_wemb_n(i_nlu, l_n, hS, num_hidden_layers, all_encoder_layer, num_out_lay
     l_n_max = max(l_n)
     wemb_n = torch.zeros([bS, l_n_max, hS * num_out_layers_n]).to(device)
     for b in range(bS):
-        # [B, max_len, dim]
-        # Fill zero for non-exist part.
+
         l_n1 = l_n[b]
         i_nlu1 = i_nlu[b]
         for i_noln in range(num_out_layers_n):
@@ -247,9 +247,10 @@ def get_wemb_n(i_nlu, l_n, hS, num_hidden_layers, all_encoder_layer, num_out_lay
             st = i_noln * hS
             ed = (i_noln + 1) * hS
             wemb_n[b, 0:(i_nlu1[1] - i_nlu1[0]), st:ed] = all_encoder_layer[i_layer][b, i_nlu1[0]:i_nlu1[1], :]
+
     return wemb_n
 
-def get_wemb_h(i_hds, l_hpu, l_hs, hS, num_hidden_layers, all_encoder_layer, num_out_layers_h):
+def get_wemb_h(i_headers, l_hpu, l_hs, hS, num_hidden_layers, all_encoder_layer, num_out_layers_h):
     """
     As if
     [ [table-1-col-1-tok1, t1-c1-t2, ...],
@@ -263,15 +264,14 @@ def get_wemb_h(i_hds, l_hpu, l_hs, hS, num_hidden_layers, all_encoder_layer, num
     num_of_all_hds = sum(l_hs)
     wemb_h = torch.zeros([num_of_all_hds, l_hpu_max, hS * num_out_layers_h]).to(device)
     b_pu = -1
-    for b, i_hds1 in enumerate(i_hds):
-        for b1, i_hds11 in enumerate(i_hds1):
+    for b, i_header in enumerate(i_headers):
+        for b1, index_pair in enumerate(i_header):
             b_pu += 1
             for i_nolh in range(num_out_layers_h):
                 i_layer = num_hidden_layers - 1 - i_nolh
                 st = i_nolh * hS
                 ed = (i_nolh + 1) * hS
-                wemb_h[b_pu, 0:(i_hds11[1] - i_hds11[0]), st:ed] \
-                    = all_encoder_layer[i_layer][b, i_hds11[0]:i_hds11[1],:]
-
+                wemb_h[b_pu, 0:(index_pair[1] - index_pair[0]), st:ed] \
+                    = all_encoder_layer[i_layer][b, index_pair[0]:index_pair[1],:]
 
     return wemb_h
