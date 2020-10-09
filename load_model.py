@@ -1,11 +1,6 @@
 import torch
-#import torch_xla
-#import torch_xla.core.xla_model as xm
 import os
 from seq2sql_model_classes import Seq2SQL_v1
-from bert_model_classes import BertConfig
-from tokenizer_classes import FullTokenizer
-from bert_model_classes import BertModel
 from transformers import RobertaConfig, RobertaModel, RobertaTokenizer
 
 device = torch.device("cuda")
@@ -26,70 +21,6 @@ def get_roberta_model():
     tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
 
     return Roberta_Model, tokenizer, configuration
-
-
-def get_bert_model(model_path, bert_model_type = 'uncased_L-12_H-768_A-12', no_pretraining = False,load_pretrained_model = False):
-    '''
-    get_bert_model
-    Arguments:
-    model_path: The path to the directory in which the model is contained
-    bert_model_type : As name suggest pass bert model type as 'uncased_L-12_H-768_A-12'
-    no_pretraining : enter true or false in case of pretrained or not
-    load_pretrained_model : want to load pretrained model(true or false)
-
-    Returns:
-    model_bert: returns bert model
-    bert_tokenizer: returns tokenizer of bert model
-    bert_config: returns configuration of bert model
-
-    '''
-    #bert_model_types:'uncased_L-12_H-768_A-12',
-                    # 'uncased_L-24_H-1024_A-16',
-                    # 'cased_L-12_H-768_A-12',
-                    #  'cased_L-24_H-1024_A-16',
-                    #  'multi_cased_L-12_H-768_A-12'
-
-    # If bert model is cased we have to uncase it i.e. convert all stuff into lowercase
-    if bert_model_type == 'cased_L-12_H-768_A-12' or bert_model_type == 'cased_L-24_H-1024_A-16' or bert_model_type == 'multi_cased_L-12_H-768_A-12':
-        convert_to_lower_case = False
-    else:
-        convert_to_lower_case = True
-
-    # File path of general configuration files
-    bert_config_file = os.path.join(model_path, f'bert_config_{bert_model_type}.json')
-    vocab_file = os.path.join(model_path, f'vocab_{bert_model_type}.txt')
-    initial_checkpoint = os.path.join(model_path, f'pytorch_model_{bert_model_type}.bin')
-
-    # Reading the configuration File
-    bert_config = BertConfig.from_json_file(bert_config_file)
-    bert_config.print_status() #Comment out if we do't want extra lines printed out
-
-    # Loading a BERT model according to configuration file 
-    model_bert = BertModel(bert_config)
-
-    # Building the Tokenizer
-    bert_tokenizer = FullTokenizer(vocab_file=vocab_file, do_lower_case=convert_to_lower_case)
-
-    # If we don't want to do pretraining
-    if no_pretraining:
-        pass
-    else:
-        model_bert.load_state_dict(torch.load(initial_checkpoint, map_location='cpu'))
-        print("Load pre-trained parameters.")
-    model_bert.to(device)
-
-    # If we have to load a already trained model
-    if load_pretrained_model:
-        assert model_path != None
-
-        if torch.cuda.is_available():
-            res = torch.load(model_path)
-        else:
-            res = torch.load(model_path, map_location='cpu')
-        model_bert.load_state_dict(res['model_bert'])
-        model_bert.to(device)
-
-    return model_bert, bert_tokenizer, bert_config
 
 
 def get_seq2sql_model(bert_hidden_layer_size, number_of_layers = 2,
