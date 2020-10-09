@@ -62,7 +62,7 @@ def get_ground_truth_values(canonical_sql_queries):
            ground_where_operator, ground_where_value
 
 
-def get_wemb_bert(bert_config, model_bert, tokenizer, nlu_t, hds, max_seq_length, num_out_layers_n=1, num_out_layers_h=1):
+def get_wemb_roberta(roberta_config, model_roberta, tokenizer, nlu_t, hds, max_seq_length, num_out_layers_n=1, num_out_layers_h=1):
     '''
     wemb_n : word embedding of natural language question
     wemb_h : word embedding of header
@@ -72,22 +72,19 @@ def get_wemb_bert(bert_config, model_bert, tokenizer, nlu_t, hds, max_seq_length
     t_to_tt_idx : map first level tokenization to second level tokenization
     tt_to_t_idx : map second level tokenization to first level tokenization
     '''
-    # get contextual output of all tokens from bert
-    all_encoder_layer, i_nlu, i_hds,\
+    # get contextual output of all tokens from RoBERTa
+    all_encoder_layer, i_nlu, i_headers,\
     l_n, l_hpu, l_hs, \
-    nlu_tt, t_to_tt_idx, tt_to_t_idx = get_roberta_output(model_bert, tokenizer, nlu_t, hds, max_seq_length)
-    # all_encoder_layer: BERT outputs from all layers.
-    # pooled_output: output of [CLS] vec.
-    # tokens: BERT intput tokens
+    nlu_tt, t_to_tt_idx, tt_to_t_idx = get_roberta_output(model_roberta, tokenizer, nlu_t, hds, max_seq_length)
+    # all_encoder_layer: RoBERTa outputs from all layers.
     # i_nlu: start and end indices of question in tokens
-    # i_hds: start and end indices of headers
-
+    # i_headers: start and end indices of headers
 
     # get the wemb
-    wemb_n = get_wemb_n(i_nlu, l_n, bert_config.hidden_size, bert_config.num_hidden_layers, all_encoder_layer,
+    wemb_n = get_wemb_n(i_nlu, l_n, roberta_config.hidden_size, roberta_config.num_hidden_layers, all_encoder_layer,
                         num_out_layers_n)
 
-    wemb_h = get_wemb_h(i_hds, l_hpu, l_hs, bert_config.hidden_size, bert_config.num_hidden_layers, all_encoder_layer,
+    wemb_h = get_wemb_h(i_headers, l_hpu, l_hs, roberta_config.hidden_size, roberta_config.num_hidden_layers, all_encoder_layer,
                         num_out_layers_h)
 
     return wemb_n, wemb_h, l_n, l_hpu, l_hs, \
@@ -224,7 +221,7 @@ def gen_l_hpu(i_headers):
     i_headers = [(17, 18), (19, 21), (22, 23), (24, 25), (26, 29), (30, 34)])
     """
     l_hpu = []
-    
+
     for i_header in i_headers:
         for index_pair in i_header:
             l_hpu.append(index_pair[1] - index_pair[0])
