@@ -1,4 +1,6 @@
 from matplotlib.pylab import *
+from bert_training import *
+from seq2sql_model_testing import *
 import json
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -142,7 +144,7 @@ def process(data,tokenize):
         if "bertindex_knowledge" not in one_final and len(one_final["sql"]["conds"])>0:
             one_final["bertindex_knowledge"] = [0] * len(nlu_tt1)
             badcase+=1
-            
+
         final_all.append([one_data["question_tok"],one_final["bertindex_knowledge"],one_final["header_knowledge"]])
         print(badcase)
     return final_all
