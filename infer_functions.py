@@ -83,7 +83,7 @@ def process(data,tokenize):
     for i, one_data in enumerate(data):
         nlu_t1 = one_data["question_tok"]
 
-        # 1. 2nd tokenization using WordPiece
+        # 1. 2nd tokenization using RoBERTa Tokenizer
         charindex2wordindex = {}
         total = 0
         tt_to_t_idx1 = []  # number indicates where sub-token belongs to in 1st-level-tokens (here, CoreNLP).
@@ -95,7 +95,7 @@ def process(data,tokenize):
             sub_tokens = tokenize.tokenize(token, is_pretokenized=True)
             for sub_token in sub_tokens:
                 tt_to_t_idx1.append(ii)
-                nlu_tt1.append(sub_token)  # all_doc_tokens are further tokenized using WordPiece tokenizer
+                nlu_tt1.append(sub_token)  # all_doc_tokens are further tokenized using RoBERTa tokenizer
 
             token_ = re_.sub('',token)
             for iii in range(len(token_)):
