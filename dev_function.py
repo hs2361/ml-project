@@ -58,7 +58,7 @@ def train(seq2sql_model,roberta_model,model_optimizer,roberta_optimizer,roberta_
 
         natural_lang_embeddings, header_embeddings, question_token_length, header_token_length, header_count, \
         natural_lang_double_tokenized, punkt_to_roberta_token_indices, roberta_to_punkt_token_indices \
-            = bert_training.get_wemb_bert(roberta_config, roberta_model, roberta_tokenizer, 
+            = bert_training.get_wemb_roberta(roberta_config, roberta_model, roberta_tokenizer, 
                                         natural_lang_utterance_tokenized, headers,max_seq_length= 222,
                                         num_out_layers_n=2, num_out_layers_h=2)
         # natural_lang_embeddings: natural language embedding
@@ -397,7 +397,7 @@ def test(seq2sql_model,roberta_model,model_optimizer,roberta_tokenizer,roberta_c
 
         natural_lang_embeddings, header_embeddings, question_token_length, header_token_length, header_count, \
         natural_lang_double_tokenized, punkt_to_roberta_token_indices, roberta_to_punkt_token_indices \
-            = bert_training.get_wemb_bert(roberta_config, roberta_model, roberta_tokenizer, 
+            = bert_training.get_wemb_roberta(roberta_config, roberta_model, roberta_tokenizer, 
                                         natural_lang_utterance_tokenized, headers,max_seq_length= 222,
                                         num_out_layers_n=2, num_out_layers_h=2)
         # natural_lang_embeddings: natural language embedding
