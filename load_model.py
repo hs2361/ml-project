@@ -68,7 +68,7 @@ def get_seq2sql_model(bert_hidden_layer_size, number_of_layers = 2,
 
     return model
 
-def get_optimizers(model, model_roberta, fine_tune =False,learning_rate_model=1e-3,learning_rate_roberta=1e-5):
+def get_optimizers(model, model_roberta,learning_rate_model=1e-3,learning_rate_roberta=1e-5):
     '''
     get_optimizers
     Arguments:
@@ -84,17 +84,11 @@ def get_optimizers(model, model_roberta, fine_tune =False,learning_rate_model=1e
 
     '''
 
+    opt = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()),
+                            lr=learning_rate_model, weight_decay=0)
 
-    if fine_tune:
-        opt = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()),
-                               lr=learning_rate_model, weight_decay=0)
-
-        opt_roberta = torch.optim.Adam(filter(lambda p: p.requires_grad, model_roberta.parameters()),
-                                    lr=learning_rate_roberta, weight_decay=0)
-    else:
-        opt = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()),
-                               lr=learning_rate_model, weight_decay=0)
-        opt_roberta = None
+    opt_roberta = torch.optim.Adam(filter(lambda p: p.requires_grad, model_roberta.parameters()),
+                                lr=learning_rate_roberta, weight_decay=0)
 
     return opt, opt_roberta
 
