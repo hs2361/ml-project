@@ -46,7 +46,7 @@ def get_seq2sql_model(bert_hidden_layer_size, number_of_layers = 2,
     
     '''
 
-    # number_of_layers = "The Number of final layers of BERT to be used in downstream task."
+    # number_of_layers = "The Number of final layers of RoBERTa to be used in downstream task."
     # hidden_vector_dimensions : "The dimension of hidden vector in the seq-to-SQL module."
     # number_lstm_layers : "The number of LSTM layers." in seqtosqlmodule
 
@@ -68,19 +68,19 @@ def get_seq2sql_model(bert_hidden_layer_size, number_of_layers = 2,
 
     return model
 
-def get_optimizers(model, model_bert, fine_tune =False,learning_rate_model=1e-3,learning_rate_bert=1e-5):
+def get_optimizers(model, model_roberta, fine_tune =False,learning_rate_model=1e-3,learning_rate_roberta=1e-5):
     '''
     get_optimizers
     Arguments:
     model: returned model from get_seq2sql_model
-    model_bert : returned model from get_bert_model
+    model_roberta : returned model from get_roberta_model
     fine_tune : want to fine tune(true or false)
     learning_rate_model : learning rate of model (from get_seq2sql_model)
-    learning_rate_bert : learning rate of bert model (from get_bert_model)
+    learning_rate_roberta : learning rate of bert model (from get_bert_model)
     
     Returns:
     opt: returns the optimised model (from get_seq2sql_model)
-    opt_bert : returns the optimised bert model (from get_bert_model)
+    opt_roberta : returns the optimised roberta model (from get_roberta_model)
 
     '''
 
@@ -89,11 +89,12 @@ def get_optimizers(model, model_bert, fine_tune =False,learning_rate_model=1e-3,
         opt = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()),
                                lr=learning_rate_model, weight_decay=0)
 
-        opt_bert = torch.optim.Adam(filter(lambda p: p.requires_grad, model_bert.parameters()),
-                                    lr=learning_rate_bert, weight_decay=0)
+        opt_roberta = torch.optim.Adam(filter(lambda p: p.requires_grad, model_roberta.parameters()),
+                                    lr=learning_rate_roberta, weight_decay=0)
     else:
         opt = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()),
                                lr=learning_rate_model, weight_decay=0)
-        opt_bert = None
+        opt_roberta = None
 
-    return opt, opt_bert
+    return opt, opt_roberta
+

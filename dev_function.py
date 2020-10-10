@@ -52,7 +52,7 @@ def train(seq2sql_model,roberta_model,model_optimizer,roberta_optimizer,roberta_
 
 
         select_column_ground, select_agg_ground, where_number_ground, \
-            where_column_ground, where_operator_ground, _ = bert_training.get_g(sql_canonical)
+            where_column_ground, where_operator_ground, _ = bert_training.get_ground_truth_values(sql_canonical)
         # get ground truth where-value index under CoreNLP tokenization scheme. It's done already on trainset.
         
 
@@ -391,7 +391,7 @@ def test(seq2sql_model,roberta_model,model_optimizer,roberta_tokenizer,roberta_c
 
 
         select_column_ground, select_agg_ground, where_number_ground, \
-            where_column_ground, where_operator_ground, _ = bert_training.get_g(sql_canonical)
+            where_column_ground, where_operator_ground, _ = bert_training.get_ground_truth_values(sql_canonical)
         # get ground truth where-value index under CoreNLP tokenization scheme. It's done already on trainset.
         
 
