@@ -193,7 +193,7 @@ def infer(nlu1,
 
     wemb_n, wemb_h, l_n, l_hpu, l_hs, \
     nlu_tt, t_to_tt_idx, tt_to_t_idx \
-        = bert_training.get_wemb_roberta(roberta_config, model_roberta, tokenizer, nlu_t, hds, max_seq_length,
+        = get_wemb_roberta(roberta_config, model_roberta, tokenizer, nlu_t, hds, max_seq_length,
                         num_out_layers_n=num_target_layers, num_out_layers_h=num_target_layers)
 
     prob_sca, prob_w, prob_wn_w, pr_sc, pr_sa, pr_wn, pr_sql_i = model.beam_forward(wemb_n, l_n, wemb_h, l_hpu,
@@ -208,7 +208,7 @@ def infer(nlu1,
     
     if len(pr_sql_i) != 1:
         raise EnvironmentError
-    pr_sql_q1 = seq2sql_model_testing.generate_sql_q(pr_sql_i, tb)
+    pr_sql_q1 = generate_sql_q(pr_sql_i, tb)
     pr_sql_q = [pr_sql_q1]
 
     print(f'START ============================================================= ')
