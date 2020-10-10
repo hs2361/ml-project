@@ -146,7 +146,6 @@ def process(data,tokenize):
             badcase+=1
 
         final_all.append([one_data["question_tok"],one_final["bertindex_knowledge"],one_final["header_knowledge"]])
-        print(badcase)
     return final_all
   
 
