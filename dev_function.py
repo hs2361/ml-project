@@ -237,7 +237,7 @@ def train(seq2sql_model,roberta_model,model_optimizer,roberta_optimizer,bert_tok
             # tb   : table metadata. No row data needed
             # hs_t : tokenized headers. Not used.
 
-            g_sc, g_sa, g_wn, g_wc, g_wo, g_wv = bert_training.get_g(sql_i)
+            g_sc, g_sa, g_wn, g_wc, g_wo, g_wv = bert_training.get_ground_truth_values(sql_i)
             # get ground truth where-value index under CoreNLP tokenization scheme. It's done already on trainset.
             g_wvi_corenlp = corenlp_local.get_g_wvi_corenlp(t)
 
