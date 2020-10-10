@@ -243,7 +243,7 @@ def train(seq2sql_model,roberta_model,model_optimizer,roberta_optimizer,bert_tok
 
             wemb_n, wemb_h, l_n, l_hpu, l_hs, \
             nlu_tt, t_to_tt_idx, tt_to_t_idx \
-                = bert_training.get_wemb_bert(bert_configs, roberta_model, bert_tokenizer, nlu_t, hds, max_seq_length,
+                = bert_training.get_wemb_roberta(bert_configs, roberta_model, bert_tokenizer, nlu_t, hds, max_seq_length,
                                 num_out_layers_n=num_target_layers, num_out_layers_h=num_target_layers)
             # wemb_n: natural language embedding
             # wemb_h: header embedding
