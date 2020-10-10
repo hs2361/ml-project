@@ -6,6 +6,69 @@ import re
 import os
 re_ = re.compile(' ')
 
+def infer(nlu1,
+          table_id, headers, types, tokenizer, 
+          model, model_bert, bert_config, max_seq_length, num_target_layers,
+          beam_size=4):
+   
+    model.eval()
+    model_bert.eval()
+
+    # Get inputs
+    nlu = [nlu1]
+
+    nlu_t1 = infer_functions.sent_split(nlu1)
+    nlu_t = [nlu_t1]
+    hds = [headers]
+    hs_t = [[]]
+
+    data = {}
+    data['question_tok'] = nlu_t[0]
+    data['table_id'] = table_id
+    data['header'] = headers
+    data = [data]
+
+    tb = {}
+    tb['id'] = table_id
+    tb['header'] = headers
+    tb['types'] = types
+    tb = [tb]
+
+    tk = tokenizer
+
+    check = infer_functions.process(data, path_wikisql, tk)
+    knowledge = [check[0][1]]
+    header_knowledge = [check[0][2]]
+
+    wemb_n, wemb_h, l_n, l_hpu, l_hs, \
+    nlu_tt, t_to_tt_idx, tt_to_t_idx \
+        = bert_training.get_wemb_roberta(bert_config, model_bert, tokenizer, nlu_t, hds, max_seq_length,
+                        num_out_layers_n=num_target_layers, num_out_layers_h=num_target_layers)
+
+    prob_sca, prob_w, prob_wn_w, pr_sc, pr_sa, pr_wn, pr_sql_i = model.beam_forward(wemb_n, l_n, wemb_h, l_hpu,
+                                                                                    l_hs, tb,
+                                                                                    nlu_t, nlu_tt,
+                                                                                    tt_to_t_idx, nlu,
+                                                                                    beam_size=beam_size,
+                                                                                    knowledge=knowledge,
+                                                                                    knowledge_header=header_knowledge)
+    pr_wc, pr_wo, pr_wv, pr_sql_i = infer_functions.sort_and_generate_pr_w(pr_sql_i)
+    
+    
+    if len(pr_sql_i) != 1:
+        raise EnvironmentError
+    pr_sql_q1 = seq2sql_model_testing.generate_sql_q(pr_sql_i, tb)
+    pr_sql_q = [pr_sql_q1]
+
+    print(f'START ============================================================= ')
+    print(f'{hds}')
+    print(f'nlu: {nlu}')
+    print(f'pr_sql_i : {pr_sql_i}')
+    print(f'pr_sql_q : {pr_sql_q}')
+    print(f'---------------------------------------------------------------------')
+
+    return pr_sql_i
+
 def tokenize_corenlp_direct_version(client, nlu1):
     nlu1_tok = []
     for sentence in client.annotate(nlu1).sentence:
